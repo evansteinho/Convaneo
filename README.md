@@ -1,6 +1,6 @@
 C:\Users\Leo\Documents\Github\Convaneo\docs\Convaneo_Logo.png
 
-#Convaneo Language
+# Convaneo Language
 Story
 - Our language was created in the year 1125 AD in the small duchy of Meckleburg. It's humble origins was pioneered by Von Duckleburg III who saw 900 years into the future where such a programming language was neccisary for three students stidying compilers. We set to advance Von Duckleburg III's original idea of a perfect programming language and create Convaneo, a statically typed language focused on being simple and straight to the point.
 
