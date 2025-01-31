@@ -1,0 +1,12 @@
+int increment(int x) {x++;}
+int decrement(int x) {x--;}
+int randomFunc(int x, int y) {
+	int z = x * y ** x;
+  	if x == 4 {z += 1;}
+	return z ** x;
+}
+
+int main() {
+	print ((string) randomFunc(5, 10));
+	return 0;
+}

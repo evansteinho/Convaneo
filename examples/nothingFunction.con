@@ -1,0 +1,6 @@
+void doNothing(int a, string b) {}
+
+int main() {
+    print ((string) doNothing(5, "Hello"));
+	return 0;
+}

@@ -1,0 +1,8 @@
+string addToString(int a, string b) {
+	return b + (string) a;
+}
+
+int main() {
+	print ((string) addToString(5, "Hello"));
+	return 0;
+}

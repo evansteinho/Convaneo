@@ -1,0 +1,16 @@
+{
+    "name": "convaneo-lang",
+    "version": "1.0.0",
+    "description": "Convaneo Language",
+    "type": "module",
+    "main": "Convaneo.js",
+    "scripts": {
+        "test": "c8 node --test test/**/*.test.js"
+    },
+    "keywords": [],
+    "author": "Leo Dai, Conner Ryan Petersen, and Evan Steinhoff",
+    "license": "ISC",
+    "devDependencies": {
+        "c8": "^10.1.3"
+    }
+}

@@ -16,28 +16,34 @@ Features
 - Built in Function Overloading (Overload typecast, Overload operators, etc)
 
 Examples
-- In Convaneo: int increment(int x) {x++;}
-- In Javascript: function increment(x) {x += 1;}
-  
-- In Convaneo: int decrement(int x) {x--;}
-- In Javascript: function decrement(x) {x -= 1;}
-  
-- In Convaneo: int randomFunc(int x, int y) {
+- In Convaneo: 
+```
+int increment(int x) {x++;}
+int decrement(int x) {x--;}
+int randomFunc(int x, int y) {
 	int z = x * y ** x;
   	if x == 4 {z += 1;}
 	return z ** x;
-  }
-- In Javascript: function randomFunc(x, y) {
+}
+void doNothing(int a, string b) {}
+string addToString(int a, string b) {
+	return b + (string) a;
+}
+```
+
+- In Javascript: 
+```
+function increment(x) {x += 1;}
+function decrement(x) {x -= 1;}
+function randomFunc(x, y) {
   	let z = x * y ** x;
   	if (x == 4) {
   		z += 1;
 	}
   	return z ** x;
-  
-- In Convaneo: void doNothing(int a, string b) {}
-- In Javascript: function doNothing(int a, string b) {}
+}
+function doNothing(int a, string b) {}
+function addToString(a, b) {return b + a}
+```
 
-- In Convaneo: string addToString(int a, string b) {
-	return b + (string) a;
-  }
-- In Javascript: function addToString(a, b) {return b + a}
+Note: Running npm test does not work even though I followed the homework helper. Running node --test works doe for some reason.
