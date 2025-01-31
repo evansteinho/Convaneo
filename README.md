@@ -1,4 +1,3 @@
-C:\Users\Leo\Documents\Github\Convaneo\docs\Convaneo_Logo.png
 ![logo](docs/Convaneo_Logo.png)
 # Convaneo Language
 Story
@@ -17,13 +16,28 @@ Features
 - Built in Function Overloading (Overload typecast, Overload operators, etc)
 
 Examples
-- int increment(int x) {x++;}
-- int decrement(int x) {x--;}
-- int randomFunc(int x, int y) {
+- In Convaneo: int increment(int x) {x++;}
+- In Javascript: function increment(x) {x += 1;}
+  
+- In Convaneo: int decrement(int x) {x--;}
+- In Javascript: function decrement(x) {x -= 1;}
+  
+- In Convaneo: int randomFunc(int x, int y) {
 	int z = x * y ** x;
+  	if x == 4 {z += 1;}
 	return z ** x;
   }
-- void doNothing(int a, string b) {}
-- addToString(int a, string b) {
+- In Javascript: function randomFunc(x, y) {
+  	let z = x * y ** x;
+  	if (x == 4) {
+  		z += 1;
+	}
+  	return z ** x;
+  
+- In Convaneo: void doNothing(int a, string b) {}
+- In Javascript: function doNothing(int a, string b) {}
+
+- In Convaneo: string addToString(int a, string b) {
 	return b + (string) a;
   }
+- In Javascript: function addToString(a, b) {return b + a}
