@@ -45,5 +45,3 @@ function randomFunc(x, y) {
 function doNothing(int a, string b) {}
 function addToString(a, b) {return b + a}
 ```
-
-Note: Running npm test does not work even though I followed the homework helper. Running node --test works doe for some reason.
