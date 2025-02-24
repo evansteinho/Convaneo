@@ -1,7 +1,12 @@
-console.log("Hello World");
+import * as fs from "fs";
+import parse from "./parser.js";
 
-function add(a, b) {
-    return a + b;
+if (process.argv.length !== 3) {
+  console.error("Usage: node src/Convaneo.js FILENAME");
+  process.exit(1);
 }
 
-export {add};
+const sourceCode = fs.readFileSync(process.argv[2], "utf8");
+const match = parse(sourceCode);
+console.log(match);
+// const program = analyze(match);

@@ -11,7 +11,7 @@ Features
 - Boolean Logic
 - Arithmatic Operators with Ints and Floats (*, +, -, /, **, //, ++, --)
 - String Methods (slicing, formatting, appending, etc)
-- Built in Datastructures (Arrays, Hashmaps, Sets)
+- Built in Datastructures (Arrays)
 - Build in Typecasting for Primative Types
 - Built in Function Overloading (Overload typecast, Overload operators, etc)
 

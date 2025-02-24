@@ -1,4 +1,4 @@
-void doNothing(int a, string b) {}
+void doNothing(int a, string b) {return;}
 
 int main() {
     print ((string) doNothing(5, "Hello"));
