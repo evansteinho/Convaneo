@@ -22,7 +22,7 @@ int increment(int x) {x++;}
 int decrement(int x) {x--;}
 int randomFunc(int x, int y) {
 	int z = x * y ** x;
-  	if x == 4 {z += 1;}
+  	if (x == 4) {z += 1;}
 	return z ** x;
 }
 void doNothing(int a, string b) {}

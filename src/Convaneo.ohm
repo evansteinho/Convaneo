@@ -2,6 +2,7 @@ Convaneo {
 	Program                     = (Statement | StatementWithBreak | StatementWithNumericReturn | StatementWithStringReturn | StatementWithBooleanReturn | StatementWithArrayReturn | StatementWithVoidReturn )+
     Statement                   = VariableDeclaration
     							| AssignmentStatement
+                                | ArrayAssignmentExpression
                                 | FunctionDeclaration
     							| PrintStatement
                                 | WhileStatement
@@ -33,7 +34,7 @@ Convaneo {
                                 | stringType id ":=" StringExpression ";"
                                 | booleanType id ":=" BooleanExpression ";"
                                 | arrayType id ":=" ArrayExpression ";"
-    AssignmentStatement         = id ":=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"		--assignment
+    AssignmentStatement         = id "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"		--assignment
     							| id incrementOperator (NumericExpression) ";"		--Increment
     FunctionDeclaration         = numericType id "(" Arguments ")" NumericReturnBlock
                                 | stringType id "(" Arguments ")" StringReturnBlock 
@@ -93,10 +94,11 @@ Convaneo {
                                 | StringExpression		--strings
                                 | BooleanExpression		--bools
                                 | id        --id
-    ArrayExpression             = ArrayExpression "+" ArrayPrimary       --union
+    ArrayAssignmentExpression   = id "[" NumericExpression "]" "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"
+    ArrayExpression  = ArrayExpression "+" ArrayPrimary       --union
                                 | ArrayExpression "-" ArrayPrimary       --difference
                                 | ArrayPrimary
-    ArrayPrimary                = (numericType | stringType | booleanType)"[" digit+ "]" "()"		--array
+    ArrayPrimary     = (numericType | stringType | booleanType)"[" digit+ "]" "()"		--array
                                 | "(" ArrayExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id		--id
@@ -117,7 +119,7 @@ Convaneo {
     numericType                 = "int" | "float" | "double"
     stringType                  = "string"
     booleanType                 = "bool"
-    arrayType                   = (numericType | stringType | booleanType)"[]"
+    arrayType                   = (arrayType | numericType | stringType | booleanType)"[]"
     booleanValue                = ("true" | "false")
     numericValue                = digit+ ("." digit+)?
     stringValue                 = "\"" (~"\"" any)* "\""
