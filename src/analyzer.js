@@ -139,7 +139,16 @@ export default function analyze(match) {
       anyReturnCondition(context.functionEntity, {location: returnKeyword})
       const entity = exp.rep()
       returnableCondition(entity, context.functionEntity, {location: returnKeyword})
-      //return core thingy here
+      return core.returnStatement({value: entity})
+    },
+    Statement_shortReturn(returnKeyword, _semicolon) {
+      inFunctionCondition({location: returnKeyword})
+      voidReturnCondition(context.functionEntity, {location: returnKeyword})
+      return core.shortReturnStatement()
+    },
+    Statement_break(breakKeyword, _semicolon) {
+      inLoopCondition({location: breakKeyword})
+      return core.breakStatement()
     },
   })
 }

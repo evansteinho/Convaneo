@@ -3,35 +3,36 @@ Convaneo {
     Statement                   = FunctionDeclaration
                                 | VariableDeclaration
     							| VariableAssignment
-                                | ArrayAssignmentExpression
-    							| PrintStatement
-                                | WhileStatement
+                                | ArrayAssignment
+    							| PrintFunction
+                                | WhileLoop
                                 | ElseStatement
                                 | ElseIfStatement
                                 | IfStatement
-                                | ForLoopStatement
-                                | ForEachStatement
-                                | IterationStatement
+                                | ForLoop
+                                | ForEach
+                                | Iteration
                                 | "return" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"    --return
                                 | "return" ";"    --shortReturn
                                 | "break" ";"   --break
+    FunctionDeclaration         = (arrayType | numericType | stringType | booleanType  | "void") id "(" Arguments ")" Block --args
 	VariableDeclaration         = numericType id ":=" NumericExpression ";" --numeric
                                 | stringType id ":=" StringExpression ";"   --string
                                 | booleanType id ":=" BooleanExpression ";" --bool
                                 | arrayType id ":=" ArrayExpression ";" --array
     VariableAssignment          = id "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"   --assign
     							| id incrementOperator NumericExpression ";"		--operator
-    FunctionDeclaration         = (arrayType | numericType | stringType | booleanType  | "void") id "(" Arguments ")" Block
-    PrintStatement              = "print" "(" StringExpression ")" ";"
+                                | (arrayType | numericType | stringType | booleanType  | "void") id "(" ")" Block   --noArgs
+    PrintFunction               = "print" "(" StringExpression ")" ";"
                                 | "print" "(" id ")" ";"
-    WhileStatement              = "while" "(" BooleanExpression ")" Block
+    WhileLoop                   = "while" "(" BooleanExpression ")" Block
     ElseStatement               = ElseIfStatement "else" Block 		-- ifelseifelse
                                 | IfStatement "else" Block			--ifelse
     ElseIfStatement             = IfStatement "else if" "(" BooleanExpression ")" Block
     IfStatement                 = "if" "(" BooleanExpression ")" Block
-    ForLoopStatement            = "for" "(" VariableDeclaration ";" BooleanExpression ";" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ")" Block		--for
-    ForEachStatement            = "for" "(" (numericType | stringType | booleanType | arrayType) "in" (stringType | arrayType) ")" Block		--for
-    IterationStatement          = iterationOperator id ";"
+    ForLoop                     = "for" "(" VariableDeclaration ";" BooleanExpression ";" (VariableAssignment | Iteration) ")" Block		--for
+    ForEach                     = "for" "(" (numericType | stringType | booleanType | arrayType) id "in" (numericType | stringType | arrayType | id) ")" Block		--for
+    Iteration                   = iterationOperator id ";"
                                 | id iterationOperator ";"
     FunctionCallExpression      = id "(" ArgumentsExpression ")"
     Arguments                   = ArgumentTerm*
@@ -74,11 +75,11 @@ Convaneo {
                                 | StringExpression		--strings
                                 | BooleanExpression		--bools
                                 | id        --id
-    ArrayAssignmentExpression   = id "[" NumericExpression "]" "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"
-    ArrayExpression  = ArrayExpression "+" ArrayPrimary       --union
+    ArrayAssignment             = id "[" NumericExpression "]" "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"
+    ArrayExpression             = ArrayExpression "+" ArrayPrimary       --union
                                 | ArrayExpression "-" ArrayPrimary       --difference
                                 | ArrayPrimary
-    ArrayPrimary     = (numericType | stringType | booleanType)"[" digit+ "]" "()"		--array
+    ArrayPrimary                = (numericType | stringType | booleanType)"[" digit+ "]" "()"		--array
                                 | "(" ArrayExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id		--id
