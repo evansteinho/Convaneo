@@ -19,12 +19,17 @@ export function functionType(paramTypes, returnType) {
     return {kind: "FunctionType", paramTypes, returnType}
 }
 
-// Statements
-export function functionStatement(name, params, body, type) {
-    return { kind: "Function", name, params, body, type}
+// Entities
+export function functionEntity(name, params, body, type) {
+    return { kind: "FunctionEntity", name, params, body, type}
 }
-export function noArgsFunction(name, type) {
-    return { kind: "Function", name, type, containsArgs: false }
+export function noArgsFunctionEntity(name, type) {
+    return { kind: "NoArgsFunctionEntity", name, type}
+}
+
+// Statements
+export function functionDeclaration(functionEntity) {
+    return { kind: "FunctionDeclaration", functionEntity }
 }
 export function variableDeclaration(variable, value) {
     return { kind: "VariableDeclaration", variable, value }

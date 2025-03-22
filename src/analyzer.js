@@ -134,20 +134,34 @@ export default function analyze(match) {
     Program(statements) {
       return core.program(statements.children.map(s => s.rep()))
     },
+    FunctionDeclaration(type, id, _open, parameters, _close, block) {
+      notRedeclaredCondition(id.sourceString, type)
+
+      const params = parameters.rep()
+      const functionType = core.functionType(params.map(param => param.type), type.rep())
+
+      const functionEntity = core.functionEntity(id.sourceString, params, block.rep(), functionType)
+      context.add(id.sourceString, functionEntity)
+      return core.functionDeclaration(functionEntity)
+    },
+    VariableDeclaration(type, id, _assignmentKey, expression, _semicolon) {
+      notRedeclaredCondition(id.sourceString, type)
+      
+    },
     Statement_return(returnKeyword, exp, _semicolon) {
-      inFunctionCondition({location: returnKeyword})
-      anyReturnCondition(context.functionEntity, {location: returnKeyword})
+      inFunctionCondition(returnKeyword)
+      anyReturnCondition(context.functionEntity, returnKeyword)
       const entity = exp.rep()
-      returnableCondition(entity, context.functionEntity, {location: returnKeyword})
-      return core.returnStatement({value: entity})
+      returnableCondition(entity, context.functionEntity, returnKeyword)
+      return core.returnStatement(entity)
     },
     Statement_shortReturn(returnKeyword, _semicolon) {
-      inFunctionCondition({location: returnKeyword})
-      voidReturnCondition(context.functionEntity, {location: returnKeyword})
+      inFunctionCondition(returnKeyword)
+      voidReturnCondition(context.functionEntity, returnKeyword)
       return core.shortReturnStatement()
     },
     Statement_break(breakKeyword, _semicolon) {
-      inLoopCondition({location: breakKeyword})
+      inLoopCondition(breakKeyword)
       return core.breakStatement()
     },
   })
