@@ -1,9 +1,9 @@
 Convaneo {
-	Program                     = Statement+
-    Statement                   = FunctionDeclaration
-                                | VariableDeclaration
-    							| VariableAssignment
+	Program                     = (Statement | StatementWithBreak | StatementWithNumericReturn | StatementWithStringReturn | StatementWithBooleanReturn | StatementWithArrayReturn | StatementWithVoidReturn )+
+    Statement                   = VariableDeclaration
+    							| AssignmentStatement
                                 | ArrayAssignmentExpression
+                                | FunctionDeclaration
     							| PrintStatement
                                 | WhileStatement
                                 | ElseStatement
@@ -12,25 +12,45 @@ Convaneo {
                                 | ForLoopStatement
                                 | ForEachStatement
                                 | IterationStatement
-                                | "return" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"    --return
-                                | "return" ";"    --shortReturn
-                                | "break" ";"   --break
-	VariableDeclaration         = numericType id ":=" NumericExpression ";" --numeric
-                                | stringType id ":=" StringExpression ";"   --string
-                                | booleanType id ":=" BooleanExpression ";" --bool
-                                | arrayType id ":=" ArrayExpression ";" --array
-    VariableAssignment          = id "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"   --assign
-    							| id incrementOperator NumericExpression ";"		--operator
-    FunctionDeclaration         = (arrayType | numericType | stringType | booleanType  | "void") id "(" Arguments ")" Block
-    PrintStatement              = "print" "(" StringExpression ")" ";"
+    StatementWithNumericReturn  = Statement
+                                | "return" NumericExpression ";"	--return
+                                | StatementWithBreak
+    StatementWithStringReturn   = Statement
+                                | "return" StringExpression ";"		--return
+                                | StatementWithBreak
+    StatementWithBooleanReturn  = Statement
+                                | "return" BooleanExpression ";"		--return
+                                | StatementWithBreak
+    StatementWithArrayReturn    = Statement
+                                | "return" ArrayExpression ";"		--return
+                                | StatementWithBreak
+    StatementWithVoidReturn     = Statement
+                                | "return" ";"		--return
+                                | StatementWithBreak
+    StatementWithBreak          = Statement
+                                | "break" ";"		--break
+                                | "continue" ";"		--continue
+	VariableDeclaration         = numericType id ":=" NumericExpression ";"
+                                | stringType id ":=" StringExpression ";"
+                                | booleanType id ":=" BooleanExpression ";"
+                                | arrayType id ":=" ArrayExpression ";"
+    AssignmentStatement         = id "=" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ";"		--assignment
+    							| id incrementOperator (NumericExpression) ";"		--Increment
+    FunctionDeclaration         = numericType id "(" Arguments ")" NumericReturnBlock
+                                | stringType id "(" Arguments ")" StringReturnBlock 
+                                | booleanType id "(" Arguments ")" BooleanReturnBlock 
+                                | arrayType id "(" Arguments ")" ArrayReturnBlock 
+                                | "void" id "(" Arguments ")" VoidReturnBlock 
+    PrintStatement              = "print" "(" TypecastExpression ")" ";"
+    							| "print" "(" StringExpression ")" ";"
                                 | "print" "(" id ")" ";"
-    WhileStatement              = "while" "(" BooleanExpression ")" Block
-    ElseStatement               = ElseIfStatement "else" Block 		-- ifelseifelse
-                                | IfStatement "else" Block			--ifelse
-    ElseIfStatement             = IfStatement "else if" "(" BooleanExpression ")" Block
-    IfStatement                 = "if" "(" BooleanExpression ")" Block
-    ForLoopStatement            = "for" "(" VariableDeclaration ";" BooleanExpression ";" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ")" Block		--for
-    ForEachStatement            = "for" "(" (numericType | stringType | booleanType | arrayType) "in" (stringType | arrayType) ")" Block		--for
+    WhileStatement              = "while" "(" BooleanExpression ")" ReturnBlock
+    ElseStatement               = ElseIfStatement "else" ReturnBlock 		-- ifelseifelse
+                                | IfStatement "else" ReturnBlock			--ifelse
+    ElseIfStatement             = IfStatement "else if" "(" BooleanExpression ")" ReturnBlock
+    IfStatement                 = "if" "(" BooleanExpression ")" ReturnBlock
+    ForLoopStatement            = "for" "(" VariableDeclaration ";" BooleanExpression ";" (NumericExpression | StringExpression | BooleanExpression | ArrayExpression) ")" ReturnBlock		--for
+    ForEachStatement            = "for" "(" (numericType | stringType | booleanType | arrayType) "in" (stringType | arrayType) ")" ReturnBlock		--for
     IterationStatement          = iterationOperator id ";"
                                 | id iterationOperator ";"
     FunctionCallExpression      = id "(" ArgumentsExpression ")"
@@ -51,7 +71,7 @@ Convaneo {
                                 | "-" NumericPrimary       --neg
                                 | NumericPrimary
     NumericPrimary              = numericValue
-    							| TypecastExpression		--typecast
+    							| "(" numericType ")" NumericExpression		--typecast
                                 | id iterationOperator       --iterPost
                                 | iterationOperator id       --iterPre
                                 | "(" NumericExpression ")"     --parens
@@ -60,14 +80,14 @@ Convaneo {
     StringExpression            = StringExpression "+" StringPrimary       --add
                                 | StringPrimary
     StringPrimary               = stringValue
-  							  	| TypecastExpression		--typecast
+  							  	| "(" stringType ")" StringExpression		--typecast
                                 | "(" StringExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id        --id
     BooleanExpression           = BooleanExpression conditionalOperator BooleanPrimary       --conditionalOps
                                 | BooleanPrimary
     BooleanPrimary              = booleanValue
-    							| TypecastExpression		--typecast
+    							| "(" booleanType ")" BooleanExpression		--typecast
                                 | "(" BooleanPrimary ")"        --parens
                                 | FunctionCallExpression		--funcs
                                 | NumericExpression		--numerals
@@ -82,8 +102,19 @@ Convaneo {
                                 | "(" ArrayExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id		--id
-    
-    Block						= "{" Statement+ "}"
+    NoReturnBlock               = "{" Statement+ "}"
+    ReturnBlock                 = BreakReturnBlock
+                                | NumericReturnBlock
+                                | StringReturnBlock
+                                | BooleanReturnBlock
+                                | ArrayReturnBlock
+                                | VoidReturnBlock
+    NumericReturnBlock          = "{" StatementWithNumericReturn+ "}"
+    StringReturnBlock           = "{" StatementWithStringReturn+ "}"
+    BooleanReturnBlock          = "{" StatementWithBooleanReturn+ "}"
+    ArrayReturnBlock            = "{" StatementWithArrayReturn+ "}"
+    VoidReturnBlock             = "{" StatementWithVoidReturn+ "}"
+    BreakReturnBlock            = "{" StatementWithBreak+ "}"
 
     numericType                 = "int" | "float" | "double"
     stringType                  = "string"
