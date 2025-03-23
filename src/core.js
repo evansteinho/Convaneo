@@ -26,6 +26,9 @@ export function functionEntity(name, params, body, type) {
 export function noArgsFunctionEntity(name, type) {
     return { kind: "NoArgsFunctionEntity", name, type}
 }
+export function variableEntity(name, type) {
+    return { kind: "VariableEntity", name, type }
+}
 
 // Statements
 export function functionDeclaration(functionEntity) {
@@ -45,6 +48,9 @@ export function printFunction(value) {
 }
 export function whileLoop(condition, body) {
     return { kind: "WhileLoop", condition, body }
+}
+export function ifBlock(ifStatement, elseIfStatements = null, elseStatement = null) {
+    return { kind: "IfBlock", ifStatement, elseIfStatements, elseStatement }
 }
 export function elseStatement(body) {
     return { kind: "ElseStatement", body }

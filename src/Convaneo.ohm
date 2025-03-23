@@ -6,9 +6,7 @@ Convaneo {
                                 | ArrayAssignment
     							| PrintFunction
                                 | WhileLoop
-                                | ElseStatement
-                                | ElseIfStatement
-                                | IfStatement
+                                | IfBlock
                                 | ForLoop
                                 | ForEach
                                 | Iteration
@@ -23,10 +21,10 @@ Convaneo {
     PrintFunction               = print "(" StringExpression ")" ";"
                                 | print "(" id ")" ";"
     WhileLoop                   = while "(" BooleanExpression ")" Block
-    ElseStatement               = ElseIfStatement else Block    -- ifelseifelse
-                                | IfStatement else Block    --ifelse
-    ElseIfStatement             = IfStatement elseIf "(" BooleanExpression ")" Block
+    IfBlock                     = IfStatement ElseIfStatement* ElseStatement?
     IfStatement                 = if "(" BooleanExpression ")" Block
+    ElseIfStatement             = elseIf "(" BooleanExpression ")" Block
+    ElseStatement               = else Block
     ForLoop                     = for "(" VariableDeclaration ";" BooleanExpression ";" (VariableAssignment | Iteration) ")" Block  --for
     ForEach                     = for "(" Type id "in" id ")" Block    --for
     Iteration                   = iterationOperator id ";"  --pre
@@ -107,7 +105,7 @@ Convaneo {
     print                       = "print"
     while                       = "while"
     if                          = "if"
-    elseIf                      = "elseIf"
+    elseIf                      = "else if"
     else                        = "else"
     break                       = "break"
     return                      = "return"

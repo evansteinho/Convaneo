@@ -147,6 +147,47 @@ export default function analyze(match) {
     VariableDeclaration(type, id, _assignmentKey, expression, _semicolon) {
       notRedeclaredCondition(id.sourceString, type)
       
+      const value = expression.rep()
+      const variableEntity = core.variableEntity(id.sourceString, value.type)
+      context.add(id.sourceString, variableEntity)
+      return core.variableDeclaration(variableEntity, value)
+    },
+    VariableAssignment(id, _equals, expression, _semicolon) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+
+      const value = expression.rep()
+      sameTypeCondition(variableEntity, value)
+      return core.variableAssignment(variableEntity, value)
+    },
+    PrintFunction(_print, _open, stringExpression, _close, _semicolon) {
+      const value = stringExpression.rep()
+      stringTypeCondition(value, _print)
+      return core.printFunction(value)
+    },
+    WhileLoop(_while, _open, booleanExpression, _close, block) {
+      const condition = booleanExpression.rep()
+      boolTypeCondition(condition, _while)
+
+      context = context.createLocalContext({ inLoop: true })
+      const body = block.rep()
+      context = context.parent
+      return core.whileLoop(condition, body)
+    },
+    IfBlock(ifStatement, elseIfStatements, elseStatement) {
+      const ifEntity = ifStatement.rep()
+      const elseifEntities = elseIfStatements?.children.map(elseIfStatement => elseIfStatement.rep()) ?? null
+      const elseEntity = elseStatement?.rep()  ?? null
+      return core.ifBlock(ifEntity, elseifEntities, elseEntity)
+    },
+    IfStatement(_if, _open, booleanExpression, _close, block) {
+      const condition = booleanExpression.rep()
+      boolTypeCondition(condition, _if)
+
+      context = context.createLocalContext()
+      const body = block.rep()
+      context = context.parent
+      return core.ifStatement(condition, body)
     },
     Statement_return(returnKeyword, exp, _semicolon) {
       inFunctionCondition(returnKeyword)

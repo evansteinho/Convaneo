@@ -1,0 +1,9 @@
+int x := 0;
+int y := 1;
+int z := 0;
+int w := 1;
+
+if (x == y) { return x; }
+else if (z > 0) { return x; }
+else if (z < 0) { return y; }
+else {return w;}

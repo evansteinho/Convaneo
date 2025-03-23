@@ -1,3 +1,16 @@
+int test(int x, int z, int y) {
+	if (x == z) { 
+		while (z == y) {
+        	//Does Something
+    		int w := 5; 
+        	return ++w;
+        }
+	} else if (z == y) {
+    	int w := x ** y;
+        return w++;
+    }
+}
+
 string addToString(int a, string b) {
 	return b + (string) a;
 }
@@ -21,7 +34,8 @@ int main() {
 	print ((string) addToString(5, "Hello"));
 	print ((string) randomFunc(5, 10));
     print ((string) doNothing(5, "Hello"));
-	print ((string)factorial(5));
+	print ((string) factorial(5));
+	print ((string) test(1, 2, 3));
     print ("Hello World!");
 	return 0;
 }
