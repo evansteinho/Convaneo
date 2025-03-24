@@ -189,6 +189,42 @@ export default function analyze(match) {
       context = context.parent
       return core.ifStatement(condition, body)
     },
+    ElseIfStatement(_elseIf, _open, booleanExpression, _close, block) {
+      const condition = booleanExpression.rep()
+      boolTypeCondition(condition, _elseIf)
+
+      context = context.createLocalContext()
+      const body = block.rep()
+      context = context.parent
+      return core.elseIfStatement(condition, body)
+    },
+    ElseStatement(_else, block) {
+      context = context.createLocalContext()
+      const body = block.rep()
+      context = context.parent
+      return core.elseStatement(body)
+    },
+    ForLoop(_for, _open, variableDeclaration, _semicolon, booleanExpression, iteration, _close, block) {
+      const variableDec = variableDeclaration.rep()
+      const condition = booleanExpression.rep()
+      boolTypeCondition(condition)
+      const iter = iteration.rep()
+      
+      context = context.createLocalContext({inLoop: true})
+      const body = block.rep()
+      return core.forLoop(variableDec, condition, iter, body)
+    },
+    ForEach(_for, _open, type, id, _in, container, _close, block) {
+      const typee = type.rep()
+      notRedeclaredCondition(id)
+      const contianerEntity = context.search(container.sourceString)
+      existsCondition(contianerEntity, container.sourceString, _for)
+      
+      context = context.createLocalContext({inLoop: true})
+      block = block.rep()
+      context = context.parent
+      return core.forEach(typee, id.sourceString, container, body)
+    },
     Statement_return(returnKeyword, exp, _semicolon) {
       inFunctionCondition(returnKeyword)
       anyReturnCondition(context.functionEntity, returnKeyword)

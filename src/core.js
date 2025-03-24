@@ -61,11 +61,11 @@ export function elseIfStatement(condition, body) {
 export function ifStatement(condition, body) {
     return { kind: "IfStatement", condition, body }
 }
-export function forLoop(iteratorDeclaration, condition, iteratorChange, body) {
-    return { kind: "ForLoop", iteratorDeclaration, condition, iteratorChange, body }
+export function forLoop(variableDeclaration, condition, iterator, body) {
+    return { kind: "ForLoop", variableDeclaration, condition, iterator, body }
 }
-export function forEach(iterator, collection, body) {
-    return { kind: "ForEach", iterator, collection, body }
+export function forEach(type, id, collection, body) {
+    return { kind: "ForEach", type, id, collection, body }
 }
 export function iteration(variable, iterationOperator) {
     return { kind: "Iteration", variable, iterationOperator}

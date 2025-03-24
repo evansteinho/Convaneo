@@ -25,7 +25,7 @@ Convaneo {
     IfStatement                 = if "(" BooleanExpression ")" Block
     ElseIfStatement             = elseIf "(" BooleanExpression ")" Block
     ElseStatement               = else Block
-    ForLoop                     = for "(" VariableDeclaration ";" BooleanExpression ";" (VariableAssignment | Iteration) ")" Block  --for
+    ForLoop                     = for "(" VariableDeclaration BooleanExpression ";" Iteration ")" Block  --for
     ForEach                     = for "(" Type id "in" id ")" Block    --for
     Iteration                   = iterationOperator id ";"  --pre
                                 | id iterationOperator ";"  --post
