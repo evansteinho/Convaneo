@@ -25,13 +25,13 @@ Convaneo {
     IfStatement                 = if "(" BooleanExpression ")" Block
     ElseIfStatement             = elseIf "(" BooleanExpression ")" Block
     ElseStatement               = else Block
-    ForLoop                     = for "(" VariableDeclaration BooleanExpression ";" Iteration ")" Block  --for
-    ForEach                     = for "(" Type id "in" id ")" Block    --for
+    ForLoop                     = for "(" VariableDeclaration BooleanExpression ";" Iteration ")" Block 
+    ForEach                     = for "(" Type id "in" id ")" Block    
     Iteration                   = iterationOperator id ";"  --pre
                                 | id iterationOperator ";"  --post
     FunctionCallExpression      = id "(" ArgumentsExpression ")"
-    Parameters                   = ParameterTerms*
-    ParameterTerms                = Type id ","?
+    Parameters                   = ParameterTerm*
+    ParameterTerm                = Type id ","?
     ArgumentsExpression         = ArgumentValue*
     ArgumentValue               = Expression ","?   --expression
                                 | id ","?   --id

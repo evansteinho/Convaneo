@@ -30,6 +30,28 @@ export function variableEntity(name, type) {
     return { kind: "VariableEntity", name, type }
 }
 
+// Expressions
+export function parameters(parameters) {
+    return { kind: "ParametersEntity", parameters }
+}
+export function parameterTerm(type, id) {
+    return { kind: "ParameterTerm", type, id }
+}
+export function argumentsExpression(argumentValues) {
+    return { kind: "ArgumentsExpression", argumentValues }
+}
+export function argumentValueVariable(variable) {
+    return { kind: "ArgumentValueVariable", variable }
+}
+export function argumentValueExpression(expression) {
+    return { kind: "ArgumentValueExpression", expression }
+}
+
+// Psuedo Statements
+export function functionCallExpression(functionEntity, argumentsExpression) {
+    return { kind: "FunctionCallExpression", functionEntity, argumentsExpression }
+}
+
 // Statements
 export function functionDeclaration(functionEntity) {
     return { kind: "FunctionDeclaration", functionEntity }
@@ -39,6 +61,9 @@ export function variableDeclaration(variable, value) {
 }
 export function variableAssignment(variable, value) {
     return { kind: "VariableAssignment", variable, value }
+}
+export function variableOperatorAssignment(variable, incrementOperator, value) {
+    return { kind: "VariableOperatorAssignment", variable, incrementOperator, value }
 }
 export function arrayAssignment(variable, index, value) {
     return { kind: "ArrayAssignment", variable, index, value }

@@ -160,6 +160,14 @@ export default function analyze(match) {
       sameTypeCondition(variableEntity, value)
       return core.variableAssignment(variableEntity, value)
     },
+    VariableAssignment_operator(id, incrementOperator, numericExpression) {
+      const variable = context.search(id.sourceString)
+      existsCondition(variable, id.sourceString, id)
+      const increment = incrementOperator.rep()
+      const value = numericExpression.rep()
+      sameTypeCondition(variable, value)
+      return core.variableOperatorAssignment(variable, increment, value)
+    },
     PrintFunction(_print, _open, stringExpression, _close, _semicolon) {
       const value = stringExpression.rep()
       stringTypeCondition(value, _print)
@@ -208,11 +216,11 @@ export default function analyze(match) {
       const variableDec = variableDeclaration.rep()
       const condition = booleanExpression.rep()
       boolTypeCondition(condition)
-      const iter = iteration.rep()
+      const iterOp = iteration.rep()
       
       context = context.createLocalContext({inLoop: true})
       const body = block.rep()
-      return core.forLoop(variableDec, condition, iter, body)
+      return core.forLoop(variableDec, condition, iterOp, body)
     },
     ForEach(_for, _open, type, id, _in, container, _close, block) {
       const typee = type.rep()
@@ -224,6 +232,48 @@ export default function analyze(match) {
       block = block.rep()
       context = context.parent
       return core.forEach(typee, id.sourceString, container, body)
+    },
+    Iteration_pre(iterationOperator, id, _semicolon) {
+      const iterOp = iterationOperator.rep()
+      const variable = context.search(id.sourceString)
+      existsCondition(variable, id.sourceString, iterationOperator)
+      return core.iteration(variable, iterOp)
+    },
+    Iteration_post(id, iterationOperator, _semicolon) {
+      const iterOp = iterationOperator.rep()
+      const variable = context.search(id.sourceString)
+      existsCondition(variable, id.sourceString, id)
+      return core.iteration(variable, iterOp)
+    },
+    FunctionCallExpression(id, _open, argumentsExpression, _close) {
+      const args = argumentsExpression.rep()
+      const functionEntity = context.search(id.sourceString)
+      existsCondition(functionEntity, id.sourceString)
+      return core.FunctionCallExpression(functionEntity, args)
+    },
+    Parameters(parameterTerms) {
+      const parameters = parameterTerms.forEach(parameterTerm => parameterTerm.rep())
+      return core.parameters(parameters)
+    },
+    ParameterTerm(type, id, _comma = null) {
+      notRedeclaredCondition(id.sourceString, type)
+      return core.parameterTerm(type, id.sourceString)
+    },
+    ArgumentsExpression(argumentValues) {
+      const argumentsVals = argumentValues.forEach(argumentValue => argumentValue.rep())
+      return core.ArgumentsExpression(argumentsVals)
+    },
+    ArgumentValue_expression(expression, _comma = null) {
+      const exp = expression.rep()
+      return core.argumentValueExpression(exp)
+    },
+    ArgumentValue_id(id, _comma = null) {
+      const variable = context.search(id.sourceString)
+      existsCondition(variable, id.sourceString)
+      return core.argumentValueVariable(variable)
+    },
+    TypecastExpression_functionCall(_open, type, _close, functionCallExpression) {
+      
     },
     Statement_return(returnKeyword, exp, _semicolon) {
       inFunctionCondition(returnKeyword)
