@@ -106,7 +106,10 @@ export default function analyze(match) {
     checkCondition(isBasicType || isCompositeType, "Type expected", location)
   }
   function isArrayCondition(type, location) {
-    must(type?.kind === "ArrayType", "Must be an array type", at)
+    checkCondition(type?.kind === "ArrayType", "Must be an array type", location)
+  }
+  function sameArrayTypeCondition(type1, type2, location) {
+    checkCondition(equivalent(type1, type2), `Array types do not match`, location)
   }
   function assignableCondition(entity, type, location) {
     checkCondition(assignable(entity.type, type), `Cannot assign a ${entity.type} to a ${type}`, location)
@@ -261,6 +264,22 @@ export default function analyze(match) {
       existsCondition(variable, id.sourceString, id)
       return core.iteration(variable, iterOp)
     },
+    Statement_return(returnKeyword, exp, _semicolon) {
+      inFunctionCondition(returnKeyword)
+      anyReturnCondition(context.functionEntity, returnKeyword)
+      const entity = exp.rep()
+      returnableCondition(entity, context.functionEntity, returnKeyword)
+      return core.returnStatement(entity)
+    },
+    Statement_shortReturn(returnKeyword, _semicolon) {
+      inFunctionCondition(returnKeyword)
+      voidReturnCondition(context.functionEntity, returnKeyword)
+      return core.shortReturnStatement()
+    },
+    Statement_break(breakKeyword, _semicolon) {
+      inLoopCondition(breakKeyword)
+      return core.breakStatement()
+    },
     FunctionCallExpression(id, _open, argumentsExpression, _close) {
       const args = argumentsExpression.rep()
       const functionEntity = context.search(id.sourceString)
@@ -377,9 +396,7 @@ export default function analyze(match) {
       return numericExpression.rep()
     },
     NumericPrimary_funcs(functionCallExpression) {
-      const functionCall = functionCallExpression.rep()
-      numericTypeCondition(functionCall, functionCallExpression)
-      return core.numericValue(functionCall.type, functionCall)
+      return functionCallExpression.rep()
     },
     NumericPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
@@ -403,9 +420,7 @@ export default function analyze(match) {
       return stringExpression.rep()
     },
     StringPrimary_funcs(functionCallExpression) {
-      const functionCall = functionCallExpression.rep()
-      stringTypeCondition(functionCall, functionCallExpression)
-      return core.stringValue(functionCall.type, functionCallExpression)
+      return functionCallExpression.rep()
     },
     StringPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
@@ -440,9 +455,7 @@ export default function analyze(match) {
       return booleanPrimary.rep()
     },
     BooleanPrimary_funcs(functionCallExpression) {
-      const functionCall = functionCallExpression.rep()
-      boolTypeCondition(functionCall, functionCallExpression)
-      return core.booleanValue(functionCall.type, functionCallExpression)
+      return functionCallExpression.rep()
     },
     BooleanPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
@@ -470,23 +483,75 @@ export default function analyze(match) {
     ArrayExpression_union(arrayExpression, _plus, arrayPrimary) {
       const arExpression = arrayExpression.rep()
       const arPrimary = arrayPrimary.rep()
-      
+      isArrayCondition(arExpression, arrayExpression)
+      isArrayCondition(arPrimary, arrayExpression)
+      sameArrayTypeCondition(arExpression.type, arPrimary.type, arrayExpression)
+      return core.arrayExpression(arExpression.type, arExpression, _plus.sourceString, arPrimary)
     },
-    Statement_return(returnKeyword, exp, _semicolon) {
-      inFunctionCondition(returnKeyword)
-      anyReturnCondition(context.functionEntity, returnKeyword)
-      const entity = exp.rep()
-      returnableCondition(entity, context.functionEntity, returnKeyword)
-      return core.returnStatement(entity)
+    ArrayExpression_difference(arrayExpression, _minus, arrayPrimary) {
+      const arExpression = arrayExpression.rep()
+      const arPrimary = arrayPrimary.rep()
+      isArrayCondition(arExpression, arrayExpression)
+      isArrayCondition(arPrimary, arrayExpression)
+      sameArrayTypeCondition(arExpression.type, arPrimary.type, arrayExpression)
+      return core.arrayExpression(arExpression.type, arExpression, _minus.sourceString, arPrimary)
     },
-    Statement_shortReturn(returnKeyword, _semicolon) {
-      inFunctionCondition(returnKeyword)
-      voidReturnCondition(context.functionEntity, returnKeyword)
-      return core.shortReturnStatement()
+    ArrayPrimary_array(type, _openBrace, numeral, _closeBrace, _openCloseParen) {
+      const elementType = type.rep()
+      const arrayType = core.arrayType(elementType)
+      const size = numeral.rep()
+      indexMustBeIntCondition(size, type)
+      return core.arrayValue(arrayType, size)
     },
-    Statement_break(breakKeyword, _semicolon) {
-      inLoopCondition(breakKeyword)
-      return core.breakStatement()
+    ArrayPrimary_parens(_open, arrayExpression, _close) {
+      return arrayExpression.rep()
+    },
+    ArrayPrimary_funcs(functionCallExpression) {
+      return functionCallExpression.rep()
+    },
+    ArrayPrimary_id(id) {
+      const arrayEntity = context.search(id.sourceString)
+      isArrayCondition(arrayEntity, id)
+      return core.arrayValue(arrayEntity.type, arrayEntity.size)
+    },
+    Block(_openBracket, statements, _closeBrackets) {
+      return statements.children.map(s => s.rep())
+    },
+    ArrayType(type, _openCloseBracket) {
+      return core.arrayType(type.rep())
+    },
+    numericType_int(_type) {
+      return core.intType
+    },
+    numericType_float(_type) {
+      return core.floatType
+    },
+    numericType_double(_type) {
+      return core.doubleType
+    },
+    stringType(_type) {
+      return core.stringType
+    },
+    booleanType(_type) {
+      return core.boolType
+    },
+    booleanValue_true(_val) {
+      return true
+    }, 
+    booleanValue_false(_val) {
+      return false
+    },
+    intValue(_digits) {
+      return BigInt(this.sourceString)
+    },
+    floatValue(_digits, _point, _fraction, _f) {
+      return Number(this.sourceString)
+    },
+    doubleValue(_digits, _point, _fraction) {
+      return Number(this.sourceString)
+    },
+    stringValue(_openQuotes, chars, _closeQuotes) {
+      return this.sourceString
     },
   })
 }
