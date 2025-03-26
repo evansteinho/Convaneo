@@ -35,7 +35,7 @@ Convaneo {
     ArgumentsExpression         = ArgumentValue*
     ArgumentValue               = Expression ","?   --expression
                                 | id ","?   --id
-    TypecastExpression          = "(" Type ")" FunctionCallExpression --functionCall
+    Typecast                    = "(" Type ")" FunctionCallExpression --functionCall
 								| "(" Type ")" Expression   --expression
                                 | "(" Type ")" id   --id
     NumericExpression           = NumericExpression "+" NumericTerm     --add
@@ -49,7 +49,7 @@ Convaneo {
                                 | "-" NumericPrimary       --neg
                                 | NumericPrimary
     NumericPrimary              = numericValue
-    							| TypecastExpression		--typecast
+    							| Typecast		--typecast
                                 | id iterationOperator       --iterPost
                                 | iterationOperator id       --iterPre
                                 | "(" NumericExpression ")"     --parens
@@ -58,19 +58,25 @@ Convaneo {
     StringExpression            = StringExpression "+" StringPrimary       --add
                                 | StringPrimary
     StringPrimary               = stringValue
-  							  	| TypecastExpression		--typecast
+  							  	| Typecast		--typecast
                                 | "(" StringExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id        --id
-    BooleanExpression           = BooleanExpression conditionalOperator BooleanPrimary       --conditionalOps
+    BooleanExpression           = BooleanExpression logicOperator BooleanExpression   --logic
+                                | BooleanSecondary comparisonOperator BooleanSecondary --compare
+                               	| "(" BooleanExpression ")" --paren
                                 | BooleanPrimary
     BooleanPrimary              = booleanValue
-    							| TypecastExpression		--typecast
-                                | "(" BooleanPrimary ")"        --parens
+                                | Typecast		--typecast
+                                | "(" BooleanPrimary ")"    --paren
                                 | FunctionCallExpression		--funcs
-                                | NumericExpression		--numerals
-                                | StringExpression		--strings
-                                | BooleanExpression		--bools
+                                | id    --id
+    BooleanSecondary            = Typecast
+                                | "(" BooleanSecondary ")"        --parens
+                                | FunctionCallExpression
+                                | NumericExpression
+                                | StringExpression
+                                | BooleanExpression
                                 | id        --id
     ArrayAssignment             = id "[" NumericExpression "]" "=" Expression ";"
     ArrayExpression             = ArrayExpression "+" ArrayPrimary       --union
@@ -80,17 +86,16 @@ Convaneo {
                                 | "(" ArrayExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id		--id
-    
     Block						= "{" Statement+ "}"
-    Type                        = arrayType --array
-                                | numericType   --numeric
-                                | stringType    --string
-                                | booleanType   --bool
-                                | void  --void
-    Expression                  = NumericExpression --numeric
-                                | StringExpression  --string
-                                | BooleanExpression --bool
-                                | ArrayExpression   --array
+    Type                        = arrayType
+                                | numericType
+                                | stringType
+                                | booleanType
+                                | void
+    Expression                  = NumericExpression
+                                | StringExpression
+                                | BooleanExpression
+                                | ArrayExpression
 
     numericType                 = "int" | "float" | "double"
     stringType                  = "string"
@@ -101,16 +106,17 @@ Convaneo {
     stringValue                 = "\"" (~"\"" any)* "\""
     iterationOperator           = "++" | "--"
     incrementOperator			= "+=" | "-=" | "*=" | "/="
-    conditionalOperator         = "<=" | "<" | "==" | "!=" | ">=" | ">"
-    print                       = "print"
-    while                       = "while"
-    if                          = "if"
-    elseIf                      = "else if"
-    else                        = "else"
-    break                       = "break"
-    return                      = "return"
-    void                        = "void"
-    for                         = "for"
+    comparisonOperator          = "<=" | "<" | "==" | "!=" | ">=" | ">"
+    logicOperator               = "||" | "&&"
+    print                       = "print" ~alnum
+    while                       = "while" ~alnum
+    if                          = "if" ~alnum
+    elseIf                      = "else if" ~alnum
+    else                        = "else" ~alnum
+    break                       = "break" ~alnum
+    return                      = "return" ~alnum
+    void                        = "void" ~alnum
+    for                         = "for" ~alnum
     keyword                     = print | while | if | elseIf | else | break | return | void | for | numericType | stringType | booleanType | arrayType | booleanValue
     id                          = ~keyword letter idchar*
     idchar                      = letter | digit | "_"

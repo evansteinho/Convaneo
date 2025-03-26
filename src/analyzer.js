@@ -91,6 +91,9 @@ export default function analyze(match) {
   function sameTypeCondition(entity1, entity2, location) {
     checkCondition(equivalent(entity1.type, entity2.type), "Operands do not have the same type", location)
   }
+  function similarTypeCondition(entity1, entity2, location) {
+    checkCondition(assignable(entity1.type, entity2.type), "Operands do not have similar types", location)
+  }
   function allSameTypeCondition(entities, location) {
     checkCondition(entities.slice(1).every(entity => entity.type === entities[0].type), "Not all elements have the same type", location)
   }
@@ -107,6 +110,9 @@ export default function analyze(match) {
   }
   function assignableCondition(entity, type, location) {
     checkCondition(assignable(entity.type, type), `Cannot assign a ${entity.type} to a ${type}`, location)
+  }
+  function typeCastableCondition(type1, type2, location) {
+    checkCondition(typeCastable(type1, type2), `Cannot cast type ${type1} to ${type2}`, location)
   }
   function inLoopCondition(location) {
     checkCondition(context.inLoop, "Break can only appear in a loop", location)
@@ -128,6 +134,9 @@ export default function analyze(match) {
   }
   function correctArgumentCountCondition(argCount, paramCount, location) {
     checkCondition(argCount === paramCount, `${paramCount} argument(s) required but ${argCount} passed`, location)
+  }
+  function indexMustBeIntCondition(index, location) {
+    checkCondition(index.type === core.intType, `Index for array must be have an int value`, location)
   }
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
@@ -248,7 +257,7 @@ export default function analyze(match) {
     FunctionCallExpression(id, _open, argumentsExpression, _close) {
       const args = argumentsExpression.rep()
       const functionEntity = context.search(id.sourceString)
-      existsCondition(functionEntity, id.sourceString)
+      existsCondition(functionEntity, id.sourceString, id)
       return core.FunctionCallExpression(functionEntity, args)
     },
     Parameters(parameterTerms) {
@@ -269,10 +278,189 @@ export default function analyze(match) {
     },
     ArgumentValue_id(id, _comma = null) {
       const variable = context.search(id.sourceString)
-      existsCondition(variable, id.sourceString)
+      existsCondition(variable, id.sourceString, id)
       return core.argumentValueVariable(variable)
     },
-    TypecastExpression_functionCall(_open, type, _close, functionCallExpression) {
+    Typecast_functionCall(_open, type, _close, functionCallExpression) {
+      const functionCall = functionCallExpression.rep()
+      const typeToCastTo = type.rep()
+      typeCastableCondition(typeToCastTo, functionCall.functionEntity.type, _open)
+      return core.typecastFunctionCall(typeToCastTo, functionCall)
+    },
+    Typecast_expression(_open, type, _close, expression) {
+      const exp = expression.rep()
+      const typeToCastTo = type.rep()
+      typeCastableCondition(typeToCastTo, exp.type, _open)
+      return core.typecastExpression(typeToCastTo, exp)
+    },
+    Typecast_id(_open, type, _close, id) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString)
+      const typeToCastTo = type.rep()
+      typeCastableCondition(typeToCastTo, variableEntity.type, _open)
+      return core.typecastVariable(typeToCastTo, variableEntity)
+    },
+    NumericExpression_add(numericExpression, _plus, numericTerm) {
+      const numExpression = numericExpression.rep()
+      const numTerm = numericTerm.rep()
+      similarTypeCondition(numExpression, numTerm, numericExpression)
+      numericTypeCondition(numTerm, numericExpression)
+      return core.numericExpression(numTerm.type, numExpression, _plus.sourceString, numTerm)
+    },
+    NumericExpression_sub(numericExpression, _minus, numericTerm) {
+      const numExpression = numericExpression.rep()
+      const numTerm = numericTerm.rep()
+      similarTypeCondition(numExpression, numTerm, numericExpression)
+      numericTypeCondition(numTerm, numericExpression)
+      return core.numericExpression(numTerm.type, numExpression, _minus.sourceString, numTerm)
+    },
+    NumericTerm_mul(numericTerm, _mul, numericFactor) {
+      const numTerm = numTerm.rep()
+      const numFactor = numericFactor.rep()
+      similarTypeCondition(numTerm, numFactor, numericTerm)
+      numericTypeCondition(numFactor, numericTerm)
+      return core.numericExpression(numFactor.type, numTerm, _mul.sourceString, numFactor)
+    },
+    NumericTerm_div(numericTerm, _div, numericFactor) {
+      const numTerm = numericTerm.rep()
+      const numFactor = numericFactor.rep()
+      similarTypeCondition(numTerm, numFactor, numericTerm)
+      numericTypeCondition(numFactor, numericTerm)
+      return core.numericExpression(numFactor.type, numTerm, _div.sourceString, numFactor)
+    },
+    NumericTerm_mod(numericTerm, _mod, numericFactor) {
+      const numTerm = numericTerm.rep()
+      const numFactor = numericFactor.rep()
+      similarTypeCondition(numTerm, numFactor, numericTerm)
+      numericTypeCondition(numFactor, numericTerm)
+      return core.numericExpression(numFactor.type, numTerm, _mod.sourceString, numFactor)
+    },
+    NumericFactor_exp(numericPrimary, _exp, numericFactor) {
+      const numPrimary = numericPrimary.rep()
+      const numFactor = numericFactor.rep()
+      similarTypeCondition(numPrimary, numFactor, numericPrimary)
+      numericTypeCondition(numPrimary, numericPrimary)
+      return core.numericExpression(numPrimary.type, numPrimary, _exp.sourceString, numFactor)
+    },
+    NumericFactor_neg(_minus, numericPrimary) {
+      const numPrimary = numericPrimary.rep()
+      numericTypeCondition(numPrimary, _minus)
+      return core.numericValue(numPrimary.type, numPrimary.value, true)
+    },
+    NumericPrimary_typecast(typeCast) {
+      const cast = typeCast.rep()
+      numericTypeCondition(cast, typeCast)
+      return core.numericValue(cast.type, cast)
+    },
+    NumericPrimary_iterPost(id, iterationOperator) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      numericTypeCondition(variableEntity)
+      const iterOp = iterationOperator.rep()
+      return core.numericValue(variableEntity.type, core.iterPostVariable(variableEntity.type, variableEntity, iterOp))
+    },
+    NumericPrimary_iterPre(id, iterationOperator) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      numericTypeCondition(variableEntity)
+      const iterOp = iterationOperator.rep()
+      return core.numericValue(variableEntity.type, core.iterPreVariable(variableEntity.type, variableEntity, iterOp))
+    },
+    NumericPrimary_parens(_open, numericExpression, _close) {
+      return numericExpression.rep()
+    },
+    NumericPrimary_funcs(functionCallExpression) {
+      const functionCall = functionCallExpression.rep()
+      numericTypeCondition(functionCall, functionCallExpression)
+      return core.numericValue(functionCall.type, functionCall)
+    },
+    NumericPrimary_id(id) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      numericTypeCondition(variableEntity, id)
+      return core.numericValue(variableEntity.type, variableEntity)
+    },
+    StringExpression_add(stringExpression, _add, stringPrimary) {
+      const strExpression = stringExpression.rep()
+      const strPrimary = stringPrimary.rep()
+      stringTypeCondition(strExpression, stringExpression)
+      stringTypeCondition(strPrimary, stringExpression)
+      return core.stringExpression(strPrimary.type, strExpression, _add.sourceString, strPrimary)
+    },
+    StringPrimary_typecast(typecast) {
+      const cast = typecast.rep()
+      stringTypeCondition(cast, typecast)
+      return core.stringValue(cast.type, cast)
+    },
+    StringPrimary_parens(_open, stringExpression, _close) {
+      return stringExpression.rep()
+    },
+    StringPrimary_funcs(functionCallExpression) {
+      const functionCall = functionCallExpression.rep()
+      stringTypeCondition(functionCall, functionCallExpression)
+      return core.stringValue(functionCall.type, functionCallExpression)
+    },
+    StringPrimary_id(id) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      stringTypeCondition(variableEntity, id)
+      return core.stringValue(variableEntity.type, variableEntity)
+    },
+    BooleanExpression_logic(booleanExpression1, logicOperator, booleanExpression2) {
+      const boolExpression1 = booleanExpression1.rep()
+      const boolExpression2 = booleanExpression2.rep()
+      boolTypeCondition(boolExpression1, booleanExpression1)
+      boolTypeCondition(boolExpression2, booleanExpression1)
+      const logicOp = logicOperator.rep()
+      return core.booleanExpression(boolExpression1.type, boolExpression1, logicOp, boolExpression2)
+    },
+    BooleanExpression_compare(booleanSecondary1, comparisonOperator, booleanSecondary2) {
+      const boolSecondary1 = booleanSecondary1.rep()
+      const boolSecondary2 = booleanSecondary2.rep()
+      sameTypeCondition(boolSecondary1, boolSecondary2, booleanSecondary1)
+      const compareOp = comparisonOperator.rep()
+      return core.booleanComparison(booleanSecondary1.type, booleanSecondary1, compareOp, booleanSecondary2)
+    },
+    BooleanExpression_paren(_open, booleanExpression, _close) {
+      return booleanExpression.rep()
+    },
+    BooleanPrimary_typecast(typecast) {
+      const cast = typecast.rep()
+      boolTypeCondition(cast, typecast)
+      return core.booleanValue(cast.type, cast)
+    },
+    BooleanPrimary_paren(_open, booleanPrimary, _close) {
+      return booleanPrimary.rep()
+    },
+    BooleanPrimary_funcs(functionCallExpression) {
+      const functionCall = functionCallExpression.rep()
+      boolTypeCondition(functionCall, functionCallExpression)
+      return core.booleanValue(functionCall.type, functionCallExpression)
+    },
+    BooleanPrimary_id(id) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      boolTypeCondition(variableEntity, id)
+      return core.booleanValue(variableEntity.type, variableEntity)
+    },
+    BooleanSecondary_parens(_open, booleanSecondary, _close) {
+      return booleanSecondary.rep()
+    },
+    BooleanSecondary_id(id) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      return variableEntity
+    },
+    ArrayAssignment(id, _bracketOpen, numericExpression, _bracketClose, _equals, expression, _semicolon) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      const index = numericExpression.rep()
+      indexMustBeIntCondition(index, id)
+      const value = expression.rep()
+      assignableIntoArrayCondition(variableEntity, value, id)
+      return core.arrayAssignment(variableEntity, index, value)
+    },
+    ArrayExpression() {
       
     },
     Statement_return(returnKeyword, exp, _semicolon) {

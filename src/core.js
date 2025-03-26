@@ -46,10 +46,46 @@ export function argumentValueVariable(variable) {
 export function argumentValueExpression(expression) {
     return { kind: "ArgumentValueExpression", expression }
 }
+export function numericExpression(type, left, op, right) {
+    return { kind: "NumericExpression", type, left, op, right }
+}
+export function numericValue(type, value, negative = false) {
+    return { kind: "NumericValue", type, value, negative }
+}
+export function stringExpression(type, left, op, right) {
+    return { kind: "StringExpression", type, left, op, right }
+}
+export function stringValue(type, value) {
+    return { kind: "StringValue", type, value }
+}
+export function booleanExpression(type, left, logicOperator, right) {
+    return { kind: "BooleanExpression", type, left, logicOperator, right }
+}
+export function booleanComparison(type, left, comparisonOperator, right) {
+    return { kind: "BooleanComparison", type, left, comparisonOperator, right}
+}
+export function booleanValue(type, value) {
+    return { kind: "BooleanValue", type, value }
+}
 
 // Psuedo Statements
 export function functionCallExpression(functionEntity, argumentsExpression) {
     return { kind: "FunctionCallExpression", functionEntity, argumentsExpression }
+}
+export function typecastFunctionCall(type, functionCallExpression) {
+    return { kind: "TypecastFunctionCall", type, functionCallExpression }
+}
+export function typecastExpression(type, expression) {
+    return { kind: "TypecastExpression", type, expression }
+}
+export function typecastVariable(type, variableEntity) {
+    return { kind: "TypecastVariable", type, variableEntity }
+}
+export function iterPostVariable(type, variableEntity, iterOp) {
+    return { kind: "IterPostVariable", type, variableEntity, iterOp }
+}
+export function iterPreVariable(type, variableEntity, iterOp) {
+    return { kind: "IterPreVariable", type, variableEntity, iterOp }
 }
 
 // Statements

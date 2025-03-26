@@ -1,0 +1,106 @@
+int test(int x, int z, int y) {
+	if (x == z) { 
+		while (z == y) {
+        	//Does Something
+    		int w := 5; 
+        	return ++w;
+        }
+	} else if (z == y) {
+    	int w := x ** y;
+        return w++;
+    }
+}
+
+string addToString(int a, string b) {
+	return b + (string) a;
+}
+
+int increment(int x) {x++;}
+int decrement(int x) {x--;}
+int randomFunc(int x, int y) {
+	int z := x * y ** x;
+  	if (x == 4) {z += 1;}
+	return increment(z) ** decrement(x);
+}
+
+void doNothing(int a, string b) {return;}
+
+int factorial(int n) {
+	if (n == 0) { return 1; }
+	return n * factorial(n - 1);
+}
+
+int main() {
+	print ((string) addToString(5, "Hello"));
+	print ((string) randomFunc(5, 10));
+    print ((string) doNothing(5, "Hello"));
+	print ((string) factorial(5));
+	print ((string) test(1, 2, 3));
+    print ("Hello World!");
+	return 0;
+}
+int factorial(int n) {
+	if (n == 0) { return 1; }
+	return n * factorial(n - 1);
+}
+
+int main() {
+	print ((string)factorial(5));
+	return 0;
+}
+print ("Hello World!");
+void doNothing(int a, string b) {return;}
+
+int main() {
+    print ((string) doNothing(5, "Hello"));
+	return 0;
+}
+int x := 0;
+int y := 1;
+int z := 0;
+int w := 1;
+
+if (x == y) { return x; }
+else if (z > 0) { return x; }
+else if (z < 0) { return y; }
+else {return w;}
+for (int x := 0; x < 10; x++;) {
+    print(x);
+}
+int increment(int x) {x++;}
+int decrement(int x) {x--;}
+int randomFunc(int x, int y) {
+	int z := x * y ** x;
+  	if (x == 4) {z += 1;}
+	return z ** x;
+}
+
+int main() {
+	print ((string) randomFunc(5, 10));
+	return 0;
+}
+string addToString(int a, string b) {
+	return b + (string) a;
+}
+
+int main() {
+	print ((string) addToString(5, "Hello"));
+	return 0;
+}
+int[] returnArrayOfLength5(bool condition) {
+    int[] array := int[5]();
+    array[0] = 0;
+    array[1] = 1;
+    array[2] = 2;
+    array[3] = 3;
+    array[4] = 4;
+    if (condition) {
+        array = int[5]();
+        array[0] = 4;
+        array[1] = 3;
+        array[2] = 2;
+        array[3] = 1;
+        array[4] = 0;
+    }
+    return array;
+}
