@@ -13,21 +13,24 @@ export const voidType = "void"
 export const anyType = "any"
 
 export function arrayType(elementType) {
-    return {kind: "ArrayType", elementType}
+    return { kind: "ArrayType", elementType }
 }
 export function functionType(paramTypes, returnType) {
-    return {kind: "FunctionType", paramTypes, returnType}
+    return { kind: "FunctionType", paramTypes, returnType }
 }
 
 // Entities
 export function functionEntity(name, params, body, type) {
-    return { kind: "FunctionEntity", name, params, body, type}
+    return { kind: "FunctionEntity", name, params, body, type }
 }
 export function noArgsFunctionEntity(name, type) {
-    return { kind: "NoArgsFunctionEntity", name, type}
+    return { kind: "NoArgsFunctionEntity", name, type }
 }
 export function variableEntity(name, type) {
     return { kind: "VariableEntity", name, type }
+}
+export function arrayEntity(name, type, size) {
+    return { kind: "ArrayEntity", name, type, size }
 }
 
 // Expressions
@@ -62,10 +65,16 @@ export function booleanExpression(type, left, logicOperator, right) {
     return { kind: "BooleanExpression", type, left, logicOperator, right }
 }
 export function booleanComparison(type, left, comparisonOperator, right) {
-    return { kind: "BooleanComparison", type, left, comparisonOperator, right}
+    return { kind: "BooleanComparison", type, left, comparisonOperator, right }
 }
 export function booleanValue(type, value) {
     return { kind: "BooleanValue", type, value }
+}
+export function arrayExpression(type, left, op, right) {
+    return { kind: "ArrayExpression", type, left, op, right }
+}
+export function arrayValue(type, size) {
+    return { kind: "ArrayValue", type, size }
 }
 
 // Psuedo Statements

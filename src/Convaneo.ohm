@@ -87,11 +87,12 @@ Convaneo {
 								| FunctionCallExpression		--funcs
                                 | id		--id
     Block						= "{" Statement+ "}"
-    Type                        = arrayType
+    Type                        = ArrayType
                                 | numericType
                                 | stringType
                                 | booleanType
                                 | void
+    ArrayType                   = Type"[]"
     Expression                  = NumericExpression
                                 | StringExpression
                                 | BooleanExpression
@@ -100,7 +101,6 @@ Convaneo {
     numericType                 = "int" | "float" | "double"
     stringType                  = "string"
     booleanType                 = "bool"
-    arrayType                   = (arrayType | numericType | stringType | booleanType)"[]"
     booleanValue                = ("true" | "false")
     numericValue                = digit+ ("." digit+)?
     stringValue                 = "\"" (~"\"" any)* "\""

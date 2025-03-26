@@ -155,11 +155,18 @@ export default function analyze(match) {
     },
     VariableDeclaration(type, id, _assignmentKey, expression, _semicolon) {
       notRedeclaredCondition(id.sourceString, type)
-      
+      const t = type.rep()
       const value = expression.rep()
-      const variableEntity = core.variableEntity(id.sourceString, value.type)
-      context.add(id.sourceString, variableEntity)
-      return core.variableDeclaration(variableEntity, value)
+      if (t?.kind === "ArrayType") {
+        sameTypeCondition(t.elementType, value.type, type)
+        const arrayEntity = core.arrayEntity(id.sourceString, t, expression.size)
+        context.add(id.sourceString, arrayEntity)
+        return core.variableDeclaration(arrayEntity, value)
+      } else {
+        const variableEntity = core.variableEntity(id.sourceString, value.type)
+        context.add(id.sourceString, variableEntity)
+        return core.variableDeclaration(variableEntity, value)
+      }
     },
     VariableAssignment(id, _equals, expression, _semicolon) {
       const variableEntity = context.search(id.sourceString)
@@ -238,7 +245,7 @@ export default function analyze(match) {
       existsCondition(contianerEntity, container.sourceString, _for)
       
       context = context.createLocalContext({inLoop: true})
-      block = block.rep()
+      const body = block.rep()
       context = context.parent
       return core.forEach(typee, id.sourceString, container, body)
     },
@@ -460,7 +467,9 @@ export default function analyze(match) {
       assignableIntoArrayCondition(variableEntity, value, id)
       return core.arrayAssignment(variableEntity, index, value)
     },
-    ArrayExpression() {
+    ArrayExpression_union(arrayExpression, _plus, arrayPrimary) {
+      const arExpression = arrayExpression.rep()
+      const arPrimary = arrayPrimary.rep()
       
     },
     Statement_return(returnKeyword, exp, _semicolon) {
