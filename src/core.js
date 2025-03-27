@@ -78,8 +78,8 @@ export function arrayValue(type, size) {
 }
 
 // Psuedo Statements
-export function functionCallExpression(functionEntity, argumentsExpression) {
-    return { kind: "FunctionCallExpression", functionEntity, argumentsExpression }
+export function functionCallExpression(functionEntity, argumentsExpression, type) {
+    return { kind: "FunctionCallExpression", functionEntity, argumentsExpression, type }
 }
 export function typecastFunctionCall(type, functionCallExpression) {
     return { kind: "TypecastFunctionCall", type, functionCallExpression }

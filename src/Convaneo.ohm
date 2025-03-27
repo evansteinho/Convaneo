@@ -2,6 +2,7 @@ Convaneo {
 	Program                     = Statement+
     Statement                   = FunctionDeclaration
                                 | VariableDeclaration
+                                | FunctionCallExpression
     							| VariableAssignment
                                 | ArrayAssignment
     							| PrintFunction
@@ -15,8 +16,8 @@ Convaneo {
                                 | break ";" --break
     FunctionDeclaration         = Type id "(" Parameters ")" Block  --args
                                 | Type id "(" ")" Block --noArgs
-	VariableDeclaration         = Type id ":=" Expression ";"
-    VariableAssignment          = id "=" Expression ";"   --assign
+	VariableDeclaration         = Type id ":=" Expression ";"?
+    VariableAssignment          = id "=" Expression ";"?   --assign
     							| id incrementOperator NumericExpression ";"   --operator
     PrintFunction               = print "(" StringExpression ")" ";"
                                 | print "(" id ")" ";"
@@ -29,7 +30,7 @@ Convaneo {
     ForEach                     = for "(" Type id "in" id ")" Block    
     Iteration                   = iterationOperator id ";"  --pre
                                 | id iterationOperator ";"  --post
-    FunctionCallExpression      = id "(" ArgumentsExpression ")"
+    FunctionCallExpression      = id "(" ArgumentsExpression ")" ";"?
     Parameters                   = ParameterTerm*
     ParameterTerm                = Type id ","?
     ArgumentsExpression         = ArgumentValue*
@@ -109,8 +110,8 @@ Convaneo {
                                 | doubleValue 
                                 | intValue
     intValue                    = digit+
-    floatValue                  = digit+ ("." digit+)? "f"
-    doubleValue                 = digit+ ("." digit+)?
+    floatValue                  = digit+ ("." digit+)? "f" ~alnum 
+    doubleValue                 = digit+ ("." digit+)
     stringValue                 = "\"" (~"\"" any)* "\""
     iterationOperator           = "++" | "--"
     incrementOperator			= "+=" | "-=" | "*=" | "/="
@@ -125,7 +126,7 @@ Convaneo {
     return                      = "return" ~alnum
     void                        = "void" ~alnum
     for                         = "for" ~alnum
-    keyword                     = print | while | if | elseIf | else | break | return | void | for | numericType | stringType | booleanType | booleanValue
+    keyword                     = iterationOperator | incrementOperator | comparisonOperator | comparisonOperator | logicOperator | print | while | if | elseIf | else | break | return | void | for | numericType | stringType | booleanType | booleanValue
     id                          = ~keyword letter idchar*
     idchar                      = letter | digit | "_"
     space                       += "//" (~"\n" any)*	--comment

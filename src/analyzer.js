@@ -8,7 +8,7 @@ class Context {
     this.locals.set(name, entity)
   }
   search(name) {
-    return this.locals.get(name) || this.parent?.searchFromContext(name)
+    return this.locals.get(name) || this.parent?.search(name)
   }
 
   static root() {
@@ -25,7 +25,7 @@ export default function analyze(match) {
   // error checking
   function checkCondition(condition, message, location) {
     if (!condition) {
-      const prefix = location.at.source.getLineAndColumnMessage()
+      const prefix = location.source.getLineAndColumnMessage()
       throw new Error(`${prefix}${message}`)
     }
   }
@@ -43,7 +43,9 @@ export default function analyze(match) {
     const numericTypes = [core.intType, core.floatType, core.doubleType]
 
     return (numericTypes.includes(type1) && numericTypes.includes(type2) ||
-      type1 === type2
+      type1 === type2 ||
+      type1 === core.stringType ||
+      type2 === core.stringType
     )
   }
   function assignable(fromType, toType) {
@@ -78,32 +80,14 @@ export default function analyze(match) {
   function boolTypeCondition(entity, location) {
     checkCondition(entity.type === core.boolType, "Expected a bool type", location)
   }
-  function numericArrayTypeCondition(entity, location) {
-    const numericTypes = [core.intType, core.floatType, core.doubleType]
-    checkCondition(numericTypes.includes(entity.type), "Expected a numeric array type", location)
-  }
-  function stringArrayTypeCondition(entity, location) {
-    checkCondition(entity.type === core.arrayType(core.stringType), "Expected a string array type", location)
-  }
-  function boolArrayTypeCondition(entity, location) {
-    checkCondition(entity.type === core.arrayType(core.boolType), "Expected a bool array type", location)
-  }
   function sameTypeCondition(entity1, entity2, location) {
     checkCondition(equivalent(entity1.type, entity2.type), "Operands do not have the same type", location)
   }
   function similarTypeCondition(entity1, entity2, location) {
     checkCondition(assignable(entity1.type, entity2.type), "Operands do not have similar types", location)
   }
-  function allSameTypeCondition(entities, location) {
-    checkCondition(entities.slice(1).every(entity => entity.type === entities[0].type), "Not all elements have the same type", location)
-  }
   function assignableIntoArrayCondition(arrayEntity, otherEntity, location) {
     checkCondition(assignable(arrayEntity.type, otherEntity.type), `Array containing ${arrayEntity.type.elementType} type cannot contain ${otherEntity.type} type`, location)
-  }
-  function existingTypeCondition(entity, location) {
-    const isBasicType = /int|float|double|string|bool|void|any/.test(entity)
-    const isCompositeType = /ArrayType/.test(e?.kind)
-    checkCondition(isBasicType || isCompositeType, "Type expected", location)
   }
   function isArrayCondition(type, location) {
     checkCondition(type?.kind === "ArrayType", "Must be an array type", location)
@@ -121,10 +105,7 @@ export default function analyze(match) {
     checkCondition(context.inLoop, "Break can only appear in a loop", location)
   }
   function inFunctionCondition(location) {
-    checkCondition(context.inFunction, "Return can only appear in  function", location)
-  }
-  function callableCondition(entity, location) {
-    checkCondition(entity.type?.kind == "FunctionType", "Call of non-function", location)
+    checkCondition(context.funcEntity !== null, "Return can only appear in  function", location)
   }
   function voidReturnCondition(functionEntity, location) {
     checkCondition(functionEntity.type.returnType === core.voidType, `Non-void function attempted to return void type`, location)
@@ -133,26 +114,60 @@ export default function analyze(match) {
     checkCondition(functionEntity.type.returnType !== core.voidType, `Void function attempted to return a non-void type`, location)
   }
   function returnableCondition(entity, functionEntity, location) {
-    checkCondition(assignableCondition(entity, functionEntity.type.returnType), location)
-  }
-  function correctArgumentCountCondition(argCount, paramCount, location) {
-    checkCondition(argCount === paramCount, `${paramCount} argument(s) required but ${argCount} passed`, location)
+    checkCondition(equivalent(entity.type, functionEntity.type.returnType) || assignableCondition(entity, functionEntity.type.returnType), `A function with a return type of ${functionEntity.type.returnType} cannot return a ${entity.type}`, location)
   }
   function indexMustBeIntCondition(index, location) {
     checkCondition(index.type === core.intType, `Index for array must be have an int value`, location)
+  }
+  function sameArgumentTypesCondition(args1, args2, location) {
+    if (args1.length !== args2.length) {
+      checkCondition(false, `Mismatched function arguments count`, location)
+      return;
+    }
+    let sameTypes = true;
+    for (let i = 0; i < args1.length; i++) {
+      sameTypes = sameTypes && args1[i] === args2[i]
+    }
+    checkCondition(sameTypes, `Mismatched function arguments`, location)
   }
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
     Program(statements) {
       return core.program(statements.children.map(s => s.rep()))
     },
-    FunctionDeclaration(type, id, _open, parameters, _close, block) {
+    FunctionDeclaration_args(type, id, _open, parameters, _close, block) {
       notRedeclaredCondition(id.sourceString, type)
 
+      const functionVariables = []
       const params = parameters.rep()
-      const functionType = core.functionType(params.map(param => param.type), type.rep())
+      params.parameters.forEach(parameterTerm => {
+        const paramType = parameterTerm.type.rep()
+        notRedeclaredCondition(parameterTerm.id, parameterTerm, paramType)
+        const variableEntity = core.variableEntity(parameterTerm.id, paramType)
+        functionVariables.push([parameterTerm.id, variableEntity])
+      })
+      const paramTypes = params.parameters.map(parameterTerm => parameterTerm.type.rep())
+      const functionType = core.functionType(paramTypes, type.rep())
+      const funcEntity = core.functionEntity(id.sourceString, params, null, functionType)
+      context = context.createLocalContext({ functionEntity: funcEntity })
+      functionVariables.forEach(pair => {
+        context.add(pair[0], pair[1])
+      });
+      const body = block.rep()
+      context = context.parent
+      funcEntity.body = body
+      context.add(id.sourceString, funcEntity)
+      return core.functionDeclaration(funcEntity)
+    },
+    FunctionDeclaration_noArgs(type, id, _open, _close, block) {
+      notRedeclaredCondition(id.sourceString, type)
 
-      const functionEntity = core.functionEntity(id.sourceString, params, block.rep(), functionType)
+      const functionType = core.functionType(null, type.rep())
+      const functionEntity = core.functionEntity(id.sourceString, null, null, functionType)
+      context = context.createLocalContext({ functionEntity: functionEntity })
+      const body = block.rep()
+      context = context.parent
+      functionEntity.body = body
       context.add(id.sourceString, functionEntity)
       return core.functionDeclaration(functionEntity)
     },
@@ -171,18 +186,17 @@ export default function analyze(match) {
         return core.variableDeclaration(variableEntity, value)
       }
     },
-    VariableAssignment(id, _equals, expression, _semicolon) {
+    VariableAssignment_assign(id, _equals, expression, _semicolon) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
-
       const value = expression.rep()
       sameTypeCondition(variableEntity, value)
       return core.variableAssignment(variableEntity, value)
     },
-    VariableAssignment_operator(id, incrementOperator, numericExpression) {
+    VariableAssignment_operator(id, incrementOperator, numericExpression, _semicolon) {
       const variable = context.search(id.sourceString)
       existsCondition(variable, id.sourceString, id)
-      const increment = incrementOperator.rep()
+      const increment = incrementOperator.sourceString
       const value = numericExpression.rep()
       sameTypeCondition(variable, value)
       return core.variableOperatorAssignment(variable, increment, value)
@@ -204,8 +218,12 @@ export default function analyze(match) {
     IfBlock(ifStatement, elseIfStatements, elseStatement) {
       const ifEntity = ifStatement.rep()
       const elseifEntities = elseIfStatements?.children.map(elseIfStatement => elseIfStatement.rep()) ?? null
-      const elseEntity = elseStatement?.rep()  ?? null
-      return core.ifBlock(ifEntity, elseifEntities, elseEntity)
+      if (elseStatement.children.length == 0) {
+        return core.ifBlock(ifEntity, elseifEntities, null)
+      } else {
+        const elseEntity = elseStatement.rep()
+        return core.ifBlock(ifEntity, elseifEntities, elseEntity)
+      }
     },
     IfStatement(_if, _open, booleanExpression, _close, block) {
       const condition = booleanExpression.rep()
@@ -231,15 +249,15 @@ export default function analyze(match) {
       context = context.parent
       return core.elseStatement(body)
     },
-    ForLoop(_for, _open, variableDeclaration, _semicolon, booleanExpression, iteration, _close, block) {
+    ForLoop(_for, _open, variableDeclaration, booleanExpression, _semicolon, iteration, _close, block) {
       const variableDec = variableDeclaration.rep()
       const condition = booleanExpression.rep()
       boolTypeCondition(condition)
-      const iterOp = iteration.rep()
+      const iter = iteration.rep()
       
       context = context.createLocalContext({inLoop: true})
       const body = block.rep()
-      return core.forLoop(variableDec, condition, iterOp, body)
+      return core.forLoop(variableDec, condition, iter, body)
     },
     ForEach(_for, _open, type, id, _in, container, _close, block) {
       const typee = type.rep()
@@ -248,18 +266,19 @@ export default function analyze(match) {
       existsCondition(contianerEntity, container.sourceString, _for)
       
       context = context.createLocalContext({inLoop: true})
+      context.add(id.sourceString, core.variableEntity(id.sourceString, typee))
       const body = block.rep()
       context = context.parent
       return core.forEach(typee, id.sourceString, container, body)
     },
     Iteration_pre(iterationOperator, id, _semicolon) {
-      const iterOp = iterationOperator.rep()
+      const iterOp = iterationOperator.sourceString
       const variable = context.search(id.sourceString)
       existsCondition(variable, id.sourceString, iterationOperator)
       return core.iteration(variable, iterOp)
     },
     Iteration_post(id, iterationOperator, _semicolon) {
-      const iterOp = iterationOperator.rep()
+      const iterOp = iterationOperator.sourceString
       const variable = context.search(id.sourceString)
       existsCondition(variable, id.sourceString, id)
       return core.iteration(variable, iterOp)
@@ -280,29 +299,32 @@ export default function analyze(match) {
       inLoopCondition(breakKeyword)
       return core.breakStatement()
     },
-    FunctionCallExpression(id, _open, argumentsExpression, _close) {
+    FunctionCallExpression(id, _open, argumentsExpression, _close, _semicolon) {
       const args = argumentsExpression.rep()
+      const argTypes = args.argumentValues.map(argValExpression => argValExpression.expression.type)
       const functionEntity = context.search(id.sourceString)
       existsCondition(functionEntity, id.sourceString, id)
-      return core.FunctionCallExpression(functionEntity, args)
+      sameArgumentTypesCondition(argTypes, functionEntity.type.paramTypes, id)
+      const functionReturnType = functionEntity.type.returnType
+      return core.functionCallExpression(functionEntity, args, functionReturnType)
     },
     Parameters(parameterTerms) {
-      const parameters = parameterTerms.forEach(parameterTerm => parameterTerm.rep())
+      const parameters = parameterTerms.children.map(parameterTerm => parameterTerm.rep())
       return core.parameters(parameters)
     },
-    ParameterTerm(type, id, _comma = null) {
+    ParameterTerm(type, id, _comma) {
       notRedeclaredCondition(id.sourceString, type)
       return core.parameterTerm(type, id.sourceString)
     },
     ArgumentsExpression(argumentValues) {
-      const argumentsVals = argumentValues.forEach(argumentValue => argumentValue.rep())
-      return core.ArgumentsExpression(argumentsVals)
+      const argumentsVals = argumentValues.children.map(argumentValue => argumentValue.rep())
+      return core.argumentsExpression(argumentsVals)
     },
-    ArgumentValue_expression(expression, _comma = null) {
+    ArgumentValue_expression(expression, _comma) {
       const exp = expression.rep()
       return core.argumentValueExpression(exp)
     },
-    ArgumentValue_id(id, _comma = null) {
+    ArgumentValue_id(id, _comma) {
       const variable = context.search(id.sourceString)
       existsCondition(variable, id.sourceString, id)
       return core.argumentValueVariable(variable)
@@ -341,7 +363,7 @@ export default function analyze(match) {
       return core.numericExpression(numTerm.type, numExpression, _minus.sourceString, numTerm)
     },
     NumericTerm_mul(numericTerm, _mul, numericFactor) {
-      const numTerm = numTerm.rep()
+      const numTerm = numericTerm.rep()
       const numFactor = numericFactor.rep()
       similarTypeCondition(numTerm, numFactor, numericTerm)
       numericTypeCondition(numFactor, numericTerm)
@@ -382,14 +404,14 @@ export default function analyze(match) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
       numericTypeCondition(variableEntity)
-      const iterOp = iterationOperator.rep()
+      const iterOp = iterationOperator.sourceString
       return core.numericValue(variableEntity.type, core.iterPostVariable(variableEntity.type, variableEntity, iterOp))
     },
     NumericPrimary_iterPre(id, iterationOperator) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
       numericTypeCondition(variableEntity)
-      const iterOp = iterationOperator.rep()
+      const iterOp = iterationOperator.sourceString
       return core.numericValue(variableEntity.type, core.iterPreVariable(variableEntity.type, variableEntity, iterOp))
     },
     NumericPrimary_parens(_open, numericExpression, _close) {
@@ -433,15 +455,15 @@ export default function analyze(match) {
       const boolExpression2 = booleanExpression2.rep()
       boolTypeCondition(boolExpression1, booleanExpression1)
       boolTypeCondition(boolExpression2, booleanExpression1)
-      const logicOp = logicOperator.rep()
-      return core.booleanExpression(boolExpression1.type, boolExpression1, logicOp, boolExpression2)
+      const logicOp = logicOperator.sourceString
+      return core.booleanExpression(core.boolType, boolExpression1, logicOp, boolExpression2)
     },
     BooleanExpression_compare(booleanSecondary1, comparisonOperator, booleanSecondary2) {
       const boolSecondary1 = booleanSecondary1.rep()
       const boolSecondary2 = booleanSecondary2.rep()
       sameTypeCondition(boolSecondary1, boolSecondary2, booleanSecondary1)
-      const compareOp = comparisonOperator.rep()
-      return core.booleanComparison(booleanSecondary1.type, booleanSecondary1, compareOp, booleanSecondary2)
+      const compareOp = comparisonOperator.sourceString
+      return core.booleanComparison(core.boolType, booleanSecondary1, compareOp, booleanSecondary2)
     },
     BooleanExpression_paren(_open, booleanExpression, _close) {
       return booleanExpression.rep()
@@ -449,7 +471,7 @@ export default function analyze(match) {
     BooleanPrimary_typecast(typecast) {
       const cast = typecast.rep()
       boolTypeCondition(cast, typecast)
-      return core.booleanValue(cast.type, cast)
+      return core.booleanValue(core.boolType, cast)
     },
     BooleanPrimary_paren(_open, booleanPrimary, _close) {
       return booleanPrimary.rep()
@@ -461,7 +483,7 @@ export default function analyze(match) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
       boolTypeCondition(variableEntity, id)
-      return core.booleanValue(variableEntity.type, variableEntity)
+      return core.booleanValue(core.boolType, variableEntity)
     },
     BooleanSecondary_parens(_open, booleanSecondary, _close) {
       return booleanSecondary.rep()
@@ -536,22 +558,30 @@ export default function analyze(match) {
       return core.boolType
     },
     booleanValue_true(_val) {
-      return true
+      return core.booleanValue(core.boolType, true)
     }, 
     booleanValue_false(_val) {
-      return false
+      return core.booleanValue(core.boolType, flase)
     },
     intValue(_digits) {
-      return BigInt(this.sourceString)
+      return core.numericValue(core.intType, BigInt(this.sourceString))
     },
     floatValue(_digits, _point, _fraction, _f) {
-      return Number(this.sourceString)
+      return core.numericValue(core.floatType, Number(this.sourceString))
     },
     doubleValue(_digits, _point, _fraction) {
-      return Number(this.sourceString)
+      return core.numericValue(core.doubleType, Number(this.sourceString))
     },
     stringValue(_openQuotes, chars, _closeQuotes) {
-      return this.sourceString
+      return core.stringValue(core.stringType, this.sourceString)
     },
+    _iter(...children) {
+      return children.map(child => child.rep());
+    },
+    _terminal() {
+      return this.sourceString
+    }
   })
+
+  return builder(match).rep()
 }
