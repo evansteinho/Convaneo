@@ -11,11 +11,11 @@ Convaneo {
                                 | ForLoop
                                 | ForEach
                                 | Iteration
+                                | return id ";"   --returnID
                                 | return Expression ";"   --return
                                 | return ";"    --shortReturn
                                 | break ";" --break
     FunctionDeclaration         = Type id "(" Parameters ")" Block  --args
-                                | Type id "(" ")" Block --noArgs
 	VariableDeclaration         = Type id ":=" Expression ";"?
     VariableAssignment          = id "=" Expression ";"?   --assign
     							| id incrementOperator NumericExpression ";"   --operator
@@ -35,10 +35,8 @@ Convaneo {
     ParameterTerm                = Type id ","?
     ArgumentsExpression         = ArgumentValue*
     ArgumentValue               = Expression ","?   --expression
-                                | id ","?   --id
     Typecast                    = "(" Type ")" FunctionCallExpression --functionCall
 								| "(" Type ")" Expression   --expression
-                                | "(" Type ")" id   --id
     NumericExpression           = NumericExpression "+" NumericTerm     --add
                                 | NumericExpression "-" NumericTerm     --sub
                                 | NumericTerm
@@ -49,28 +47,23 @@ Convaneo {
     NumericFactor               = NumericPrimary ("**") NumericFactor       --exp
                                 | "-" NumericPrimary       --neg
                                 | NumericPrimary
-    NumericPrimary              = numericValue
+    NumericPrimary              = numericValue ~comparisonOperator
     							| Typecast		--typecast
-                                | id iterationOperator       --iterPost
-                                | iterationOperator id       --iterPre
-                                | "(" NumericExpression ")"     --parens
-                                | FunctionCallExpression		--funcs
-                                | id		--id
+                                | id iterationOperator ~comparisonOperator       --iterPost
+                                | iterationOperator id ~comparisonOperator       --iterPre
+                                | "(" NumericExpression ")" ~comparisonOperator    --parens
+                                | FunctionCallExpression ~comparisonOperator		--funcs
+                                | id ~comparisonOperator		--id
     StringExpression            = StringExpression "+" StringPrimary       --add
                                 | StringPrimary
-    StringPrimary               = stringValue
+    StringPrimary               = stringValue ~comparisonOperator
   							  	| Typecast		--typecast
-                                | "(" StringExpression ")"      --parens
-								| FunctionCallExpression		--funcs
-                                | id        --id
+                                | "(" StringExpression ")" ~comparisonOperator      --parens
     BooleanExpression           = BooleanExpression logicOperator BooleanExpression   --logic
                                 | BooleanSecondary comparisonOperator BooleanSecondary --compare
-                               	| "(" BooleanExpression ")" --paren
                                 | BooleanPrimary
     BooleanPrimary              = booleanValue
-                                | Typecast		--typecast
                                 | "(" BooleanPrimary ")"    --paren
-                                | FunctionCallExpression		--funcs
                                 | id    --id
     BooleanSecondary            = Typecast
                                 | "(" BooleanSecondary ")"        --parens
@@ -81,12 +74,9 @@ Convaneo {
                                 | id        --id
     ArrayAssignment             = id "[" NumericExpression "]" "=" Expression ";"
     ArrayExpression             = ArrayExpression "+" ArrayPrimary       --union
-                                | ArrayExpression "-" ArrayPrimary       --difference
                                 | ArrayPrimary
     ArrayPrimary                = Type "[" NumericExpression "]" "()"		--array
                                 | "(" ArrayExpression ")"      --parens
-								| FunctionCallExpression		--funcs
-                                | id		--id
     Block						= "{" Statement* "}"
     Type                        = ArrayType
                                 | numericType

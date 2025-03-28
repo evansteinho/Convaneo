@@ -23,9 +23,6 @@ export function functionType(paramTypes, returnType) {
 export function functionEntity(name, params, body, type) {
     return { kind: "FunctionEntity", name, params, body, type }
 }
-export function noArgsFunctionEntity(name, type) {
-    return { kind: "NoArgsFunctionEntity", name, type }
-}
 export function variableEntity(name, type) {
     return { kind: "VariableEntity", name, type }
 }
@@ -42,9 +39,6 @@ export function parameterTerm(type, id) {
 }
 export function argumentsExpression(argumentValues) {
     return { kind: "ArgumentsExpression", argumentValues }
-}
-export function argumentValueVariable(variable) {
-    return { kind: "ArgumentValueVariable", variable }
 }
 export function argumentValueExpression(expression) {
     return { kind: "ArgumentValueExpression", expression }
@@ -86,9 +80,6 @@ export function typecastFunctionCall(type, functionCallExpression) {
 }
 export function typecastExpression(type, expression) {
     return { kind: "TypecastExpression", type, expression }
-}
-export function typecastVariable(type, variableEntity) {
-    return { kind: "TypecastVariable", type, variableEntity }
 }
 export function iterPostVariable(type, variableEntity, iterOp) {
     return { kind: "IterPostVariable", type, variableEntity, iterOp }

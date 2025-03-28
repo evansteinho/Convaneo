@@ -51,15 +51,7 @@ export default function analyze(match) {
   function assignable(fromType, toType) {
     return (
       toType == core.anyType ||
-      equivalent(fromType, toType) ||
-      (fromType?.kind === "FunctionType" &&
-        toType?.kind === "FunctionType" &&
-
-        assignable(fromType.returnType, toType.returnType) &&
-        fromType.paramTypes.length === toType.paramTypes.length &&
-        
-        toType.paramTypes.every((t, i) => assignable(t, fromType.paramTypes[i]))) ||
-      typeCastable(fromType, toType)
+      equivalent(fromType, toType)
     )
   }
 
@@ -87,16 +79,13 @@ export default function analyze(match) {
     checkCondition(assignable(entity1.type, entity2.type), "Operands do not have similar types", location)
   }
   function assignableIntoArrayCondition(arrayEntity, otherEntity, location) {
-    checkCondition(assignable(arrayEntity.type, otherEntity.type), `Array containing ${arrayEntity.type.elementType} type cannot contain ${otherEntity.type} type`, location)
+    checkCondition(assignable(arrayEntity.type.elementType, otherEntity.type), `Array containing ${arrayEntity.type.elementType} type cannot contain ${otherEntity.type} type`, location)
   }
   function isArrayCondition(type, location) {
     checkCondition(type?.kind === "ArrayType", "Must be an array type", location)
   }
   function sameArrayTypeCondition(type1, type2, location) {
     checkCondition(equivalent(type1, type2), `Array types do not match`, location)
-  }
-  function assignableCondition(entity, type, location) {
-    checkCondition(assignable(entity.type, type), `Cannot assign a ${entity.type} to a ${type}`, location)
   }
   function typeCastableCondition(type1, type2, location) {
     checkCondition(typeCastable(type1, type2), `Cannot cast type ${type1} to ${type2}`, location)
@@ -114,7 +103,7 @@ export default function analyze(match) {
     checkCondition(functionEntity.type.returnType !== core.voidType, `Void function attempted to return a non-void type`, location)
   }
   function returnableCondition(entity, functionEntity, location) {
-    checkCondition(equivalent(entity.type, functionEntity.type.returnType) || assignableCondition(entity, functionEntity.type.returnType), `A function with a return type of ${functionEntity.type.returnType} cannot return a ${entity.type}`, location)
+    checkCondition(equivalent(entity.type, functionEntity.type.returnType), `A function with a return type of ${functionEntity.type.returnType} cannot return a ${entity.type}`, location)
   }
   function indexMustBeIntCondition(index, location) {
     checkCondition(index.type === core.intType, `Index for array must be have an int value`, location)
@@ -158,18 +147,6 @@ export default function analyze(match) {
       funcEntity.body = body
       context.add(id.sourceString, funcEntity)
       return core.functionDeclaration(funcEntity)
-    },
-    FunctionDeclaration_noArgs(type, id, _open, _close, block) {
-      notRedeclaredCondition(id.sourceString, type)
-
-      const functionType = core.functionType(null, type.rep())
-      const functionEntity = core.functionEntity(id.sourceString, null, null, functionType)
-      context = context.createLocalContext({ functionEntity: functionEntity })
-      const body = block.rep()
-      context = context.parent
-      functionEntity.body = body
-      context.add(id.sourceString, functionEntity)
-      return core.functionDeclaration(functionEntity)
     },
     VariableDeclaration(type, id, _assignmentKey, expression, _semicolon) {
       notRedeclaredCondition(id.sourceString, type)
@@ -217,7 +194,10 @@ export default function analyze(match) {
     },
     IfBlock(ifStatement, elseIfStatements, elseStatement) {
       const ifEntity = ifStatement.rep()
-      const elseifEntities = elseIfStatements?.children.map(elseIfStatement => elseIfStatement.rep()) ?? null
+      let elseifEntities = null
+      if (elseIfStatements.children.length != 0) {
+        elseifEntities = elseIfStatements.children.map(elseIfStatement => elseIfStatement.rep())
+      }
       if (elseStatement.children.length == 0) {
         return core.ifBlock(ifEntity, elseifEntities, null)
       } else {
@@ -283,6 +263,14 @@ export default function analyze(match) {
       existsCondition(variable, id.sourceString, id)
       return core.iteration(variable, iterOp)
     },
+    Statement_returnID(returnKeyword, id, _semicolon) {
+      inFunctionCondition(returnKeyword)
+      anyReturnCondition(context.functionEntity, returnKeyword)
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      returnableCondition(variableEntity, context.functionEntity, returnKeyword)
+      return core.returnStatement(variableEntity)
+    },
     Statement_return(returnKeyword, exp, _semicolon) {
       inFunctionCondition(returnKeyword)
       anyReturnCondition(context.functionEntity, returnKeyword)
@@ -324,11 +312,6 @@ export default function analyze(match) {
       const exp = expression.rep()
       return core.argumentValueExpression(exp)
     },
-    ArgumentValue_id(id, _comma) {
-      const variable = context.search(id.sourceString)
-      existsCondition(variable, id.sourceString, id)
-      return core.argumentValueVariable(variable)
-    },
     Typecast_functionCall(_open, type, _close, functionCallExpression) {
       const functionCall = functionCallExpression.rep()
       const typeToCastTo = type.rep()
@@ -341,18 +324,10 @@ export default function analyze(match) {
       typeCastableCondition(typeToCastTo, exp.type, _open)
       return core.typecastExpression(typeToCastTo, exp)
     },
-    Typecast_id(_open, type, _close, id) {
-      const variableEntity = context.search(id.sourceString)
-      existsCondition(variableEntity, id.sourceString)
-      const typeToCastTo = type.rep()
-      typeCastableCondition(typeToCastTo, variableEntity.type, _open)
-      return core.typecastVariable(typeToCastTo, variableEntity)
-    },
     NumericExpression_add(numericExpression, _plus, numericTerm) {
       const numExpression = numericExpression.rep()
       const numTerm = numericTerm.rep()
       similarTypeCondition(numExpression, numTerm, numericExpression)
-      numericTypeCondition(numTerm, numericExpression)
       return core.numericExpression(numTerm.type, numExpression, _plus.sourceString, numTerm)
     },
     NumericExpression_sub(numericExpression, _minus, numericTerm) {
@@ -397,7 +372,6 @@ export default function analyze(match) {
     },
     NumericPrimary_typecast(typeCast) {
       const cast = typeCast.rep()
-      numericTypeCondition(cast, typeCast)
       return core.numericValue(cast.type, cast)
     },
     NumericPrimary_iterPost(id, iterationOperator) {
@@ -407,7 +381,7 @@ export default function analyze(match) {
       const iterOp = iterationOperator.sourceString
       return core.numericValue(variableEntity.type, core.iterPostVariable(variableEntity.type, variableEntity, iterOp))
     },
-    NumericPrimary_iterPre(id, iterationOperator) {
+    NumericPrimary_iterPre(iterationOperator, id) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
       numericTypeCondition(variableEntity)
@@ -441,15 +415,6 @@ export default function analyze(match) {
     StringPrimary_parens(_open, stringExpression, _close) {
       return stringExpression.rep()
     },
-    StringPrimary_funcs(functionCallExpression) {
-      return functionCallExpression.rep()
-    },
-    StringPrimary_id(id) {
-      const variableEntity = context.search(id.sourceString)
-      existsCondition(variableEntity, id.sourceString, id)
-      stringTypeCondition(variableEntity, id)
-      return core.stringValue(variableEntity.type, variableEntity)
-    },
     BooleanExpression_logic(booleanExpression1, logicOperator, booleanExpression2) {
       const boolExpression1 = booleanExpression1.rep()
       const boolExpression2 = booleanExpression2.rep()
@@ -465,19 +430,8 @@ export default function analyze(match) {
       const compareOp = comparisonOperator.sourceString
       return core.booleanComparison(core.boolType, booleanSecondary1, compareOp, booleanSecondary2)
     },
-    BooleanExpression_paren(_open, booleanExpression, _close) {
-      return booleanExpression.rep()
-    },
-    BooleanPrimary_typecast(typecast) {
-      const cast = typecast.rep()
-      boolTypeCondition(cast, typecast)
-      return core.booleanValue(core.boolType, cast)
-    },
     BooleanPrimary_paren(_open, booleanPrimary, _close) {
       return booleanPrimary.rep()
-    },
-    BooleanPrimary_funcs(functionCallExpression) {
-      return functionCallExpression.rep()
     },
     BooleanPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
@@ -505,18 +459,10 @@ export default function analyze(match) {
     ArrayExpression_union(arrayExpression, _plus, arrayPrimary) {
       const arExpression = arrayExpression.rep()
       const arPrimary = arrayPrimary.rep()
-      isArrayCondition(arExpression, arrayExpression)
-      isArrayCondition(arPrimary, arrayExpression)
+      isArrayCondition(arExpression.type, arrayExpression)
+      isArrayCondition(arPrimary.type, arrayExpression)
       sameArrayTypeCondition(arExpression.type, arPrimary.type, arrayExpression)
       return core.arrayExpression(arExpression.type, arExpression, _plus.sourceString, arPrimary)
-    },
-    ArrayExpression_difference(arrayExpression, _minus, arrayPrimary) {
-      const arExpression = arrayExpression.rep()
-      const arPrimary = arrayPrimary.rep()
-      isArrayCondition(arExpression, arrayExpression)
-      isArrayCondition(arPrimary, arrayExpression)
-      sameArrayTypeCondition(arExpression.type, arPrimary.type, arrayExpression)
-      return core.arrayExpression(arExpression.type, arExpression, _minus.sourceString, arPrimary)
     },
     ArrayPrimary_array(type, _openBrace, numeral, _closeBrace, _openCloseParen) {
       const elementType = type.rep()
@@ -527,14 +473,6 @@ export default function analyze(match) {
     },
     ArrayPrimary_parens(_open, arrayExpression, _close) {
       return arrayExpression.rep()
-    },
-    ArrayPrimary_funcs(functionCallExpression) {
-      return functionCallExpression.rep()
-    },
-    ArrayPrimary_id(id) {
-      const arrayEntity = context.search(id.sourceString)
-      isArrayCondition(arrayEntity, id)
-      return core.arrayValue(arrayEntity.type, arrayEntity.size)
     },
     Block(_openBracket, statements, _closeBrackets) {
       return statements.children.map(s => s.rep())
@@ -561,7 +499,7 @@ export default function analyze(match) {
       return core.booleanValue(core.boolType, true)
     }, 
     booleanValue_false(_val) {
-      return core.booleanValue(core.boolType, flase)
+      return core.booleanValue(core.boolType, false)
     },
     intValue(_digits) {
       return core.numericValue(core.intType, BigInt(this.sourceString))
