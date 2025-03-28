@@ -1,9 +1,24 @@
-int x := 0;
-int y := 1;
-int z := 0;
-int w := 1;
+void something() {
+    int x := 0;
+    int y := 1;
+    int z := 0;
+    int w := 1;
 
-if (x == y) { return x; }
-else if (z > 0) { return x; }
-else if (z < 0) { return y; }
-else {return w;}
+    if (x == y) { return x; }
+    else if (z > 0) { return x; }
+    else if (z < 0) { return y; }
+    else {return w;}
+}
+void somethingElse() {
+    float x := 3.0f; 
+    int y := 3; 
+    if (((int) x) < y) {
+        print("x is smaller than y");
+    } 
+    else if (((int) x) > y) {
+        print("x is greater than y");
+    } 
+    else {
+        print("x and y are equal");
+    }
+}

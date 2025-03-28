@@ -63,22 +63,21 @@ Convaneo {
                                 | "(" StringExpression ")" ~comparisonOperator      --parens
 								| FunctionCallExpression ~comparisonOperator		--funcs
                                 | id ~comparisonOperator        --id
-    BooleanExpression           = BooleanExpression logicOperator BooleanExpression   --logic
-                                | BooleanSecondary comparisonOperator BooleanSecondary --compare
-                               	| "(" BooleanExpression ")" --paren
+    BooleanExpression           = "(" BooleanExpression ")" (logicOperator BooleanExpression)* --paren
+    							| BooleanSecondary comparisonOperator BooleanSecondary --compare
+    							| BooleanExpression logicOperator BooleanExpression   --logic
                                 | BooleanPrimary
     BooleanPrimary              = booleanValue
-                                | Typecast		--typecast
-                                | "(" BooleanPrimary ")"    --paren
-                                | FunctionCallExpression		--funcs
                                 | id    --id
-    BooleanSecondary            = Typecast
-                                | "(" BooleanSecondary ")"        --parens
+    BooleanSecondary            = "(" BooleanSecondary ")"        --parens
                                 | FunctionCallExpression
                                 | NumericExpression
                                 | StringExpression
                                 | BooleanExpression
                                 | id        --id
+                                | numericValue
+                                | stringValue
+                                | booleanValue
     ArrayAssignment             = id "[" NumericExpression "]" "=" Expression ";"
     ArrayExpression             = ArrayExpression "+" ArrayPrimary       --union
                                 | ArrayExpression "-" ArrayPrimary       --difference

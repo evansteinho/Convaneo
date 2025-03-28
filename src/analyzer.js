@@ -434,8 +434,18 @@ export default function analyze(match) {
       const compareOp = comparisonOperator.sourceString
       return core.booleanComparison(core.boolType, booleanSecondary1, compareOp, booleanSecondary2)
     },
-    BooleanPrimary_paren(_open, booleanPrimary, _close) {
-      return booleanPrimary.rep()
+    BooleanExpression_paren(_open, boolExp, _close, optionalLogicOp, optionalBoolExp) {
+      const mainExp = boolExp.rep();
+      if (optionalLogicOp.children.length != 0 && optionalBoolExp.children.length != 0) {
+        const logicOps = optionalLogicOp.children.map(child => child.rep()) 
+        const boolExps = optionalBoolExp.children.map(child => child.rep()) 
+        let mainBoolExp = core.booleanExpression(core.boolType, mainExp, logicOps[0], boolExps[0])
+        // for (let i = 1; i < optionalLogicOp.children.length; i++) {
+        //   mainBoolExp = core.booleanExpression(core.boolType, mainBoolExp, logicOps[i], boolExps[i])
+        // }
+        return mainBoolExp
+      }
+      return mainExp
     },
     BooleanPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)

@@ -31,6 +31,13 @@ const syntaxChecks = [
   ["Void NoArgs", `void x() {return;} int main() { x(); return 0; }`],
   ["Operators", `int x := 1; x += 1; x -= 1; x *= 1; x /= 1;`],
   ["Operators More", `int x := 1; int y := x++; y = ++x;`],
+  ["Bool Stuff", 
+    `
+    float x := 1.0f; 
+    float y := 2.0f; 
+    bool z := (x != y && x == y) || x < y;
+    `
+  ],
 ]
 
 // Programs with syntax errors that the parser will detect
