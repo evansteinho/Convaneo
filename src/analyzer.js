@@ -124,7 +124,7 @@ export default function analyze(match) {
     Program(statements) {
       return core.program(statements.children.map(s => s.rep()))
     },
-    FunctionDeclaration_args(type, id, _open, parameters, _close, block) {
+    FunctionDeclaration(type, id, _open, parameters, _close, block) {
       notRedeclaredCondition(id.sourceString, type)
 
       const functionVariables = []
@@ -138,6 +138,7 @@ export default function analyze(match) {
       const paramTypes = params.parameters.map(parameterTerm => parameterTerm.type.rep())
       const functionType = core.functionType(paramTypes, type.rep())
       const funcEntity = core.functionEntity(id.sourceString, params, null, functionType)
+      context.add(id.sourceString, funcEntity)
       context = context.createLocalContext({ functionEntity: funcEntity })
       functionVariables.forEach(pair => {
         context.add(pair[0], pair[1])
@@ -287,7 +288,10 @@ export default function analyze(match) {
       inLoopCondition(breakKeyword)
       return core.breakStatement()
     },
-    FunctionCallExpression(id, _open, argumentsExpression, _close, _semicolon) {
+    Statement_function(functionCallExpression, _semicolon) {
+      return functionCallExpression.rep() 
+    },
+    FunctionCallExpression(id, _open, argumentsExpression, _close) {
       const args = argumentsExpression.rep()
       const argTypes = args.argumentValues.map(argValExpression => argValExpression.expression.type)
       const functionEntity = context.search(id.sourceString)

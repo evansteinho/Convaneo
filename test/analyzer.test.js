@@ -32,6 +32,47 @@ const semanticChecks = [
     ["Void NoArgs", `void x() {return;} int main() { x(); return 0; }`],
     ["Operators", `int x := 1; x += 1; x -= 1; x *= 1; x /= 1;`],
     ["Operators More", `int x := 1; int y := x++; y = ++x;`],
+    ["Recursive Test",
+      `
+      int factorial(int n) {
+        if (n == 0) { return 1; }
+        return n * factorial(n - 1);
+      }
+
+      int main() {
+        print ((string) factorial(5));
+        return 0;
+      }
+      `
+    ],
+    ["Nothing Test", 
+      `
+      void doNothing(int a, string b) {return;}
+
+      int main() {
+          print ((string) doNothing(5, "Hello"));
+        return 0;
+      }
+      `
+    ],
+    ["Calling global variable",
+      `
+      int x := 1;
+      int func() {
+        return x;
+      }
+      print((string) func());
+      `
+    ],
+    ["Assigning global variable when local var with same name exists",
+      `
+      int func() {
+        int x := 1;
+        return x;
+      }
+      int x := func();
+      `
+    ],
 ]
 
 // Programs that are syntactically correct but have semantic errors
@@ -46,6 +87,29 @@ const semanticErrors = [
     ["inproper forLoop", `for (int i := 0; i = 10; i++;) {print((string) i);}`],
     ["inProperBreak", `break;`],
     ["Bad Function Call", `int f(int x, int y) {return x + 1;} f(1, 2, 3);`],
+    ["NonExistant Function Call", 
+      `
+      main("hi");
+      `
+    ],
+    ["Calling variable out of scope",
+      `
+      int func() {
+        int x := 1;
+        return x;
+      }
+      print(x);
+      `
+    ],
+    ["Assigning local variable when global var with same name exists",
+      `
+      int x := 1;
+      int func() {
+        int x := 1;
+        return x;
+      }
+      `
+    ],
 ]
 
 describe("The analyzer", () => {
