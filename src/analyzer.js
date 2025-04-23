@@ -401,8 +401,7 @@ export default function analyze(match) {
     NumericPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
-      numericTypeCondition(variableEntity, id)
-      return core.numericValue(variableEntity.type, variableEntity)
+      return core.idValue(variableEntity.type, variableEntity)
     },
     StringExpression_add(stringExpression, _add, stringPrimary) {
       const strExpression = stringExpression.rep()
@@ -418,6 +417,11 @@ export default function analyze(match) {
     },
     StringPrimary_parens(_open, stringExpression, _close) {
       return stringExpression.rep()
+    },
+    StringPrimary_id(id) {
+      const variableEntity = context.search(id.sourceString)
+      existsCondition(variableEntity, id.sourceString, id)
+      return core.idValue(variableEntity.type, variableEntity)
     },
     BooleanExpression_logic(booleanExpression1, logicOperator, booleanExpression2) {
       const boolExpression1 = booleanExpression1.rep()
@@ -450,8 +454,8 @@ export default function analyze(match) {
     BooleanPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
-      boolTypeCondition(variableEntity, id)
-      return core.booleanValue(core.boolType, variableEntity)
+      return core.idValue(variableEntity.type, variableEntity)
+
     },
     BooleanSecondary_parens(_open, booleanSecondary, _close) {
       return booleanSecondary.rep()
@@ -459,7 +463,8 @@ export default function analyze(match) {
     BooleanSecondary_id(id) {
       const variableEntity = context.search(id.sourceString)
       existsCondition(variableEntity, id.sourceString, id)
-      return variableEntity
+      return core.idValue(variableEntity.type, variableEntity)
+
     },
     ArrayAssignment(id, _bracketOpen, numericExpression, _bracketClose, _equals, expression, _semicolon) {
       const variableEntity = context.search(id.sourceString)
@@ -487,6 +492,9 @@ export default function analyze(match) {
     },
     ArrayPrimary_parens(_open, arrayExpression, _close) {
       return arrayExpression.rep()
+    },
+    ArrayPrimary_funcs(functionCallExpression) {
+      return core.functionCallValue(functionCallExpression.rep())
     },
     Block(_openBracket, statements, _closeBrackets) {
       return statements.children.map(s => s.rep())

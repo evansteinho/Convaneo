@@ -41,6 +41,17 @@ const semanticChecks = [
     ["Void NoArgs", `void x() {return;} int main() { x(); return 0; }`],
     ["Operators", `int x := 1; x += 1; x -= 1; x *= 1; x /= 1;`],
     ["Operators More", `int x := 1; int y := x++; y = ++x;`],
+    ["String Add", `void add(string x) {print("hello " + x);}`],
+    ["Hello World",
+      `
+      void printHello(string name) {
+        print ("Hello World!" + name);
+      }
+      printHello("ni hao");
+      string test := "ni bu hao";
+      printHello(test);
+      `
+    ],
     ["Recursive Test",
       `
       int factorial(int n) {
@@ -121,6 +132,19 @@ const semanticErrors = [
     ],
 ]
 
+const specificTest = [
+  ["Hello World",
+    `
+    void printHello(string name) {
+      print ("Hello World!" + name);
+    }
+    printHello("ni hao");
+    string test := "ni bu hao";
+    printHello(test);
+    `
+  ]
+]
+
 describe("The analyzer", () => {
   for (const [scenario, source] of semanticChecks) {
     it(`recognizes ${scenario}`, () => {
@@ -130,6 +154,11 @@ describe("The analyzer", () => {
   for (const [scenario, source, errorMessagePattern] of semanticErrors) {
     it(`throws on ${scenario}`, () => {
       assert.throws(() => analyze(parse(source)), errorMessagePattern)
+    })
+  }
+  for (const [scenario, source] of specificTest) {
+    it(`recognizes ${scenario}`, () => {
+      assert.ok(analyze(parse(source)))
     })
   }
 })

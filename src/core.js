@@ -70,6 +70,12 @@ export function arrayExpression(type, left, op, right) {
 export function arrayValue(type, size) {
     return { kind: "ArrayValue", type, size }
 }
+export function idValue(type, variableEntity) {
+    return { kind: "IDValue", type, variableEntity }
+}
+export function functionCallValue(functionCallExpression) {
+    return { kind: "FunctionCallValue", functionCallExpression }
+}
 
 // Psuedo Statements
 export function functionCallExpression(functionEntity, argumentsExpression, type) {
