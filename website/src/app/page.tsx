@@ -132,11 +132,165 @@ export default function Home() {
           >
             Language Examples
           </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Array Example */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Test Function Example */}
             <motion.div 
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">Nested Control Flow</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`int test(int x, int z, int y) {
+    if (x == z) { 
+        while (z == y) {
+            //Does Something
+            int w := 5; 
+            return ++w;
+        }
+    } else if (z == y) {
+        int w := x ** y;
+        return w++;
+    }
+}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* String Conversion Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">String Conversion</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`string addToString(int a, string b) {
+    return b + (string) a;
+}
+
+int main() {
+    print ((string) addToString(5, "Hello"));
+    return 0;
+}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* Function Operations Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">Function Operations</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`int increment(int x) {x++;}
+int decrement(int x) {x--;}
+int randomFunc(int x, int y) {
+    int z := x * y ** x;
+    if (x == 4) {z += 1;}
+    return z ** x;
+}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* Void Function Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">Void Functions</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`void doNothing(int a, string b) {
+    return;
+}
+
+int main() {
+    print ((string) doNothing(5, "Hello"));
+    return 0;
+}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* Recursive Function Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">Recursive Functions</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`int factorial(int n) {
+    if (n == 0) { return 1; }
+    return n * factorial(n - 1);
+}
+
+int main() {
+    print ((string)factorial(5));
+    return 0;
+}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* Control Flow Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">Control Flow</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`int x := 0;
+int y := 1;
+int z := 0;
+int w := 1;
+
+if (x == y) { return x; }
+else if (z > 0) { return x; }
+else if (z < 0) { return y; }
+else {return w;}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* Loop Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">For Loop</h3>
+              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
+                <code>{`for (int x := 0; x < 10; x++;) {
+    print(x);
+}`}</code>
+              </pre>
+            </motion.div>
+
+            {/* Array Operations Example */}
+            <motion.div 
+              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
+              initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
@@ -160,67 +314,6 @@ export default function Home() {
         array[4] = 0;
     }
     return array;
-}`}</code>
-              </pre>
-            </motion.div>
-
-            {/* Control Flow Example */}
-            <motion.div 
-              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 className="text-xl font-semibold mb-4">Control Flow</h3>
-              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
-                <code>{`int x := 0;
-int y := 1;
-int z := 0;
-int w := 1;
-
-if (x == y) { return x; }
-else if (z > 0) { return x; }
-else if (z < 0) { return y; }
-else {return w;}`}</code>
-              </pre>
-            </motion.div>
-
-            {/* Function Example */}
-            <motion.div 
-              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 className="text-xl font-semibold mb-4">Function Definition</h3>
-              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
-                <code>{`int increment(int x) {x++;}
-int decrement(int x) {x--;}
-int randomFunc(int x, int y) {
-    int z = x * y ** x;
-    if (x == 4) {z += 1;}
-    return z ** x;
-}`}</code>
-              </pre>
-            </motion.div>
-
-            {/* Type Casting Example */}
-            <motion.div 
-              className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 className="text-xl font-semibold mb-4">Type Casting</h3>
-              <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
-                <code>{`string addToString(int a, string b) {
-    return b + (string) a;
 }`}</code>
               </pre>
             </motion.div>
