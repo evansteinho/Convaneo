@@ -20,7 +20,7 @@ const semanticChecks = [
     ["IterationPost", `int x := 1; for (int i := 0; i < 10; i++;) {x++;}`],
     ["Args Function", `int f(int x, int y) {return x + 1;} f(1, 2);`],
     ["No Args Function", `void f() {print("Hello World");} f();`],
-    ["Array", `int[] testArray := (int[5]());`],
+    ["Array", `int[] testArray := (int[5]()); int x := testArray[0];`],
     ["Array return", `int[] testArrayGiver() { return int[5](); } int[] testArray := testArrayGiver();`],
     ["Array Assignment", `int[] testArrayGiver() { int[] x := int[5](); x[0] = 1; x[1] = 2; return x; } int[] testArray := testArrayGiver() + testArrayGiver();`],
     ["Array Ops", `int[] x := int[5]() + int[5]();`],

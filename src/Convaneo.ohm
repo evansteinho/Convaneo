@@ -39,6 +39,7 @@ Convaneo {
     Typecast                    = "(" Type ")" FunctionCallExpression --functionCall
 								| "(" Type ")" Expression   --expression
                                 | "(" Type ")" id   --id
+    ArrayAccess                 = id "[" NumericExpression "]"
     NumericExpression           = NumericExpression "+" NumericTerm     --add
                                 | NumericExpression "-" NumericTerm     --sub
                                 | NumericTerm
@@ -80,7 +81,6 @@ Convaneo {
                                 | booleanValue
     ArrayAssignment             = id "[" NumericExpression "]" "=" Expression ";"
     ArrayExpression             = ArrayExpression "+" ArrayPrimary       --union
-                                | ArrayExpression "-" ArrayPrimary       --difference
                                 | ArrayPrimary
     ArrayPrimary                = Type "[" NumericExpression "]" "()"		--array
                                 | "(" ArrayExpression ")"      --parens
@@ -93,7 +93,8 @@ Convaneo {
                                 | booleanType
                                 | void
     ArrayType                   = Type "[]"
-    Expression                  = NumericExpression
+    Expression                  = ArrayAccess
+                                | NumericExpression
                                 | StringExpression
                                 | BooleanExpression
                                 | ArrayExpression

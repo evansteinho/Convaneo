@@ -37,7 +37,7 @@ const fixtures = [
         source: ` 
             int test(int x, int z, int y) {
                 if (x == z) { 
-                    while (z == y) {
+                    while (z == y && true) {
                         //Does Something
                         int w := 5; 
                         return ++w;
@@ -47,9 +47,10 @@ const fixtures = [
                     return w++;
                 } else {
                     int w := 0
-                    while (x > 0) {
+                    while (x > 0 || x == 10) {
                         w += z * y;
                         x--;
+                        x -= 0;
                     }
                     return w;
                 }
@@ -62,28 +63,37 @@ const fixtures = [
             x = test(x, z, y);
             z = 2 + x;
             y = 2 / z;
-            test(x, z, y);
+            float tester := (float) test(x, z, y);
+            double testerDouble := (double) test(x, z, y);
+            int testerInt := (int) test(x, z, y);
+            int i := (int) x;
+            float a := (float) x;
+            double b := (double) x;
+            string c := (string) x;
+            bool d := (bool) x == x;
         `,
         expected: dedent`
             function test(x, z, y) {
                 if (x === z) {
-                    while (z === y) {
+                    while (z === y && true) {
                         let w = 5
                         return ++w
                     }
-                } else if (z === y) {
+                }
+                else if (z === y) {
                     let w = x ** y
                     return w++
-                } else {
+                }
+                else {
                     let w = 0
-                    while (x > 0) {
+                    while (x > 0 || x === 10) {
                         w += z * y
                         x--
+                        x -= 0
                     }
                     return w
                 }
             }
-
             let x = 1
             let z = 1
             let y = 1
@@ -91,7 +101,71 @@ const fixtures = [
             x = test(x, z, y)
             z = 2 + x
             y = 2 / z
-            test(x, z, y)
+            let tester = parseFloat(test(x, z, y))
+            let testerDouble = Number(test(x, z, y))
+            let testerInt = parseInt(test(x, z, y))
+            let i = parseInt(x)
+            let a = parseFloat(x)
+            let b = Number(x)
+            let c = String(x)
+            let d = Boolean(x === x)
+        `
+    },
+    {
+        name: `forloops and forEach`,
+        source: ` 
+            int[] array := int[5]();
+            array[0] = 0;
+            array[1] = 1;
+            array[2] = 2;
+            array[3] = 3;
+            array[4] = 4;
+            array = array + array;
+            for(int i := 0; i < 5; i++;) {
+                print((string) array[i]);
+                if (i == 4) {
+                    break;
+                }
+            }
+            for(int item in array) {
+                print((string) array[item]);
+            }
+        `,
+        expected: dedent`
+            let array = new Array(5)
+            array[0] = 0
+            array[1] = 1
+            array[2] = 2
+            array[3] = 3
+            array[4] = 4
+            array = array + array
+            for(let i = 0; i < 5; i++) {
+                console.log(String(array[i]))
+                if (i === 4) {
+                    break
+                }
+            }
+            array.forEach(function(item) {
+                console.log(String(array[item]))
+            })
+        `
+    },
+    {
+        name: `other`,
+        source: 
+        `
+            int[] x := int[5]() + int[5]();
+            void hi() {
+                return;
+            }
+            hi();
+        `,
+        expected: dedent`
+            let x = new Array(5) + new Array(5)
+            function hi() {
+                return
+            }
+            hi()
         `
     }
 ] 

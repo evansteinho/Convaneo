@@ -73,8 +73,11 @@ export function arrayValue(type, size) {
 export function idValue(type, variableEntity) {
     return { kind: "IDValue", type, variableEntity }
 }
-export function functionCallValue(functionCallExpression) {
-    return { kind: "FunctionCallValue", functionCallExpression }
+export function functionCallValue(type, functionCallExpression) {
+    return { kind: "FunctionCallValue", type, functionCallExpression }
+}
+export function arrayIndexValue(type, array, index) {
+    return { kind: "ArrayIndexValue", type, array, index }
 }
 
 // Psuedo Statements
@@ -134,8 +137,8 @@ export function forLoop(variableDeclaration, condition, iterator, body) {
 export function forEach(type, id, collection, body) {
     return { kind: "ForEach", type, id, collection, body }
 }
-export function iteration(variable, iterationOperator) {
-    return { kind: "Iteration", variable, iterationOperator}
+export function iteration(variable, iterationOperator, pre) {
+    return { kind: "Iteration", variable, iterationOperator, pre}
 }
 export function returnStatement(value) {
     return { kind: "ReturnStatement", value }

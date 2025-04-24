@@ -250,19 +250,19 @@ export default function analyze(match) {
       context.add(id.sourceString, core.variableEntity(id.sourceString, typee))
       const body = block.rep()
       context = context.parent
-      return core.forEach(typee, id.sourceString, container, body)
+      return core.forEach(typee, id.sourceString, contianerEntity, body)
     },
     Iteration_pre(iterationOperator, id, _semicolon) {
       const iterOp = iterationOperator.sourceString
       const variable = context.search(id.sourceString)
       existsCondition(variable, id.sourceString, iterationOperator)
-      return core.iteration(variable, iterOp)
+      return core.iteration(variable, iterOp, true)
     },
     Iteration_post(id, iterationOperator, _semicolon) {
       const iterOp = iterationOperator.sourceString
       const variable = context.search(id.sourceString)
       existsCondition(variable, id.sourceString, id)
-      return core.iteration(variable, iterOp)
+      return core.iteration(variable, iterOp, false)
     },
     Statement_returnID(returnKeyword, id, _semicolon) {
       inFunctionCondition(returnKeyword)
@@ -319,14 +319,21 @@ export default function analyze(match) {
     Typecast_functionCall(_open, type, _close, functionCallExpression) {
       const functionCall = functionCallExpression.rep()
       const typeToCastTo = type.rep()
-      typeCastableCondition(typeToCastTo, functionCall.functionEntity.type, _open)
-      return core.typecastFunctionCall(typeToCastTo, functionCall)
+      typeCastableCondition(typeToCastTo, functionCall.type, _open)
+      return core.typecastFunctionCall(typeToCastTo, core.functionCallValue(functionCall.functionEntity.type.returnType, functionCall))
     },
     Typecast_expression(_open, type, _close, expression) {
       const exp = expression.rep()
       const typeToCastTo = type.rep()
       typeCastableCondition(typeToCastTo, exp.type, _open)
       return core.typecastExpression(typeToCastTo, exp)
+    },
+    ArrayAccess(id, _open, numericExpression, _close){
+      const exp = numericExpression.rep()
+      numericTypeCondition(exp, id)
+      const array = context.search(id.sourceString)
+      existsCondition(array, id.sourceString, id)
+      return core.arrayIndexValue(array.type.elementType, array, exp)
     },
     NumericExpression_add(numericExpression, _plus, numericTerm) {
       const numExpression = numericExpression.rep()
@@ -396,7 +403,8 @@ export default function analyze(match) {
       return numericExpression.rep()
     },
     NumericPrimary_funcs(functionCallExpression) {
-      return functionCallExpression.rep()
+      const functionCallExp =  functionCallExpression.rep()
+      return core.functionCallValue(functionCallExp.functionEntity.type.returnType, functionCallExp)
     },
     NumericPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
@@ -492,9 +500,6 @@ export default function analyze(match) {
     },
     ArrayPrimary_parens(_open, arrayExpression, _close) {
       return arrayExpression.rep()
-    },
-    ArrayPrimary_funcs(functionCallExpression) {
-      return core.functionCallValue(functionCallExpression.rep())
     },
     Block(_openBracket, statements, _closeBrackets) {
       return statements.children.map(s => s.rep())
