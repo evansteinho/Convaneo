@@ -116,6 +116,8 @@ const optimizers = {
     }
     return e
   },
+  
+
   PrintFunction(e) {
     e.value = optimize(e.value)
     return e
