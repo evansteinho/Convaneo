@@ -71,7 +71,11 @@ export default function generate(program) {
       return `new Array(${gen(node.size)})`
     },
     IDValue(node) {
-      return node.variableEntity.name
+      let negative = ""
+      if (node.negative) {
+        negative = "-"
+      }
+      return negative + node.variableEntity.name
     },
     FunctionCallValue(node) {
       return `${node.functionCallExpression.functionEntity.name}(${node.functionCallExpression.argumentsExpression.argumentValues.map((e) => gen(e.expression)).join(", ")})`

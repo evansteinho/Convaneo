@@ -9,6 +9,7 @@
         "testAnalyzer": "c8 node --test test/analyzer.test.js",
         "testParser": "c8 node --test test/parser.test.js",
         "testGenerator": "c8 node --test test/generator.test.js",
+        "testOptimizer": "c8 node --test test/optimizer.test.js",
         "test": "c8 node --test test/**/*.test.js"
     },
     "keywords": [],

@@ -70,8 +70,8 @@ export function arrayExpression(type, left, op, right) {
 export function arrayValue(type, size) {
     return { kind: "ArrayValue", type, size }
 }
-export function idValue(type, variableEntity) {
-    return { kind: "IDValue", type, variableEntity }
+export function idValue(type, variableEntity, negative = false) {
+    return { kind: "IDValue", type, variableEntity, negative }
 }
 export function functionCallValue(type, functionCallExpression) {
     return { kind: "FunctionCallValue", type, functionCallExpression }

@@ -379,6 +379,9 @@ export default function analyze(match) {
     NumericFactor_neg(_minus, numericPrimary) {
       const numPrimary = numericPrimary.rep()
       numericTypeCondition(numPrimary, _minus)
+      if (numPrimary.kind === "IDValue") {
+        return core.idValue(numPrimary.type, numPrimary.variableEntity, true)
+      }
       return core.numericValue(numPrimary.type, numPrimary.value, true)
     },
     NumericPrimary_typecast(typeCast) {
