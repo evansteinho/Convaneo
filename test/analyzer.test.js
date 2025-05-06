@@ -42,6 +42,7 @@ const semanticChecks = [
     ["Operators", `int x := 1; x += 1; x -= 1; x *= 1; x /= 1;`],
     ["Operators More", `int x := 1; int y := x++; y = ++x;`],
     ["String Add", `void add(string x) {print("hello " + x);}`],
+    ["Other", `bool x := true`],
     ["Hello World",
       `
       void printHello(string name) {

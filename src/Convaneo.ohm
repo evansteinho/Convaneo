@@ -50,32 +50,31 @@ Convaneo {
     NumericFactor               = NumericPrimary ("**") NumericFactor       --exp
                                 | "-" NumericPrimary       --neg
                                 | NumericPrimary
-    NumericPrimary              = numericValue ~comparisonOperator
+    NumericPrimary              = numericValue
     							| Typecast		--typecast
-                                | id iterationOperator ~comparisonOperator       --iterPost
-                                | iterationOperator id ~comparisonOperator       --iterPre
-                                | "(" NumericExpression ")" ~comparisonOperator    --parens
-                                | FunctionCallExpression ~comparisonOperator		--funcs
-                                | id ~comparisonOperator		--id
+                                | id iterationOperator       --iterPost
+                                | iterationOperator id       --iterPre
+                                | "(" NumericExpression ")"    --parens
+                                | FunctionCallExpression		--funcs
+                                | id		--id
     StringExpression            = StringExpression "+" StringPrimary       --add
                                 | StringPrimary
-    StringPrimary               = stringValue ~comparisonOperator
+    StringPrimary               = stringValue
   							  	| Typecast		--typecast
-                                | "(" StringExpression ")" ~comparisonOperator      --parens
-								| FunctionCallExpression ~comparisonOperator		--funcs
-                                | id ~comparisonOperator        --id
-    BooleanExpression           = "(" BooleanExpression ")" (logicOperator BooleanExpression)* --paren
+                                | "(" StringExpression ")"      --parens
+								| FunctionCallExpression		--funcs
+                                | id        --id
+    BooleanExpression           = BooleanExpression (logicOperator BooleanExpression)* --mult 
+    							| "(" BooleanExpression ")"  --paren
     							| BooleanSecondary comparisonOperator BooleanSecondary --compare
-    							| BooleanExpression logicOperator BooleanExpression   --logic
                                 | BooleanPrimary
     BooleanPrimary              = booleanValue
-                                | id    --id
+                                | id  ~ ("()")  --id
     BooleanSecondary            = "(" BooleanSecondary ")"        --parens
                                 | FunctionCallExpression
                                 | NumericExpression
                                 | StringExpression
                                 | BooleanExpression
-                                | id        --id
                                 | numericValue
                                 | stringValue
                                 | booleanValue
@@ -94,9 +93,10 @@ Convaneo {
                                 | void
     ArrayType                   = Type "[]"
     Expression                  = ArrayAccess
+    							| NumericExpression ~comparisonOperator
+                                | BooleanExpression
                                 | NumericExpression
                                 | StringExpression
-                                | BooleanExpression
                                 | ArrayExpression
 
     numericType                 = "int" --int 
@@ -116,6 +116,7 @@ Convaneo {
     iterationOperator           = "++" | "--"
     incrementOperator			= "+=" | "-=" | "*=" | "/="
     comparisonOperator          = "<=" | "<" | "==" | "!=" | ">=" | ">"
+    arithmaticOperator = "+" | "-" | "*" | "/" | "**" | "%"
     logicOperator               = "||" | "&&"
     print                       = "print" ~alnum
     while                       = "while" ~alnum

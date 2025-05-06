@@ -431,14 +431,6 @@ export default function analyze(match) {
       existsCondition(variableEntity, id.sourceString, id)
       return core.idValue(variableEntity.type, variableEntity)
     },
-    BooleanExpression_logic(booleanExpression1, logicOperator, booleanExpression2) {
-      const boolExpression1 = booleanExpression1.rep()
-      const boolExpression2 = booleanExpression2.rep()
-      boolTypeCondition(boolExpression1, booleanExpression1)
-      boolTypeCondition(boolExpression2, booleanExpression1)
-      const logicOp = logicOperator.sourceString
-      return core.booleanExpression(core.boolType, boolExpression1, logicOp, boolExpression2)
-    },
     BooleanExpression_compare(booleanSecondary1, comparisonOperator, booleanSecondary2) {
       const boolSecondary1 = booleanSecondary1.rep()
       const boolSecondary2 = booleanSecondary2.rep()
@@ -446,18 +438,15 @@ export default function analyze(match) {
       const compareOp = comparisonOperator.sourceString
       return core.booleanComparison(core.boolType, booleanSecondary1, compareOp, booleanSecondary2)
     },
-    BooleanExpression_paren(_open, boolExp, _close, optionalLogicOp, optionalBoolExp) {
+    BooleanExpression_paren(_open, boolExp, _close) {
+      return boolExp.rep()
+    },
+    BooleanExpression_mult(boolExp, optionalLogicOp, optionalBoolExp) {
       const mainExp = boolExp.rep();
-      if (optionalLogicOp.children.length != 0 && optionalBoolExp.children.length != 0) {
-        const logicOps = optionalLogicOp.children.map(child => child.rep()) 
-        const boolExps = optionalBoolExp.children.map(child => child.rep()) 
-        let mainBoolExp = core.booleanExpression(core.boolType, mainExp, logicOps[0], boolExps[0])
-        // for (let i = 1; i < optionalLogicOp.children.length; i++) {
-        //   mainBoolExp = core.booleanExpression(core.boolType, mainBoolExp, logicOps[i], boolExps[i])
-        // }
-        return mainBoolExp
-      }
-      return mainExp
+      const logicOps = optionalLogicOp.children.map(child => child.rep()) 
+      const boolExps = optionalBoolExp.children.map(child => child.rep()) 
+      let mainBoolExp = core.booleanExpression(core.boolType, mainExp, logicOps[0], boolExps[0])
+      return mainBoolExp
     },
     BooleanPrimary_id(id) {
       const variableEntity = context.search(id.sourceString)
@@ -467,12 +456,6 @@ export default function analyze(match) {
     },
     BooleanSecondary_parens(_open, booleanSecondary, _close) {
       return booleanSecondary.rep()
-    },
-    BooleanSecondary_id(id) {
-      const variableEntity = context.search(id.sourceString)
-      existsCondition(variableEntity, id.sourceString, id)
-      return core.idValue(variableEntity.type, variableEntity)
-
     },
     ArrayAssignment(id, _bracketOpen, numericExpression, _bracketClose, _equals, expression, _semicolon) {
       const variableEntity = context.search(id.sourceString)
