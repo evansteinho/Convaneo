@@ -1,18 +1,18 @@
-import { describe, it } from "node:test"
-import assert from "node:assert/strict"
-import parse from "../src/parser.js"
-import analyze from "../src/analyzer.js"
-import generate from "../src/generator.js"
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import parse from "../src/parser.js";
+import analyze from "../src/analyzer.js";
+import generate from "../src/generator.js";
 
 function dedent(s) {
-    return `${s}`.replace(/(?<=\n)\s+/g, "").trim()
+  return `${s}`.replace(/(?<=\n)\s+/g, "").trim();
 }
 
 // Programs with syntax errors that the parser will detect
 const fixtures = [
-    {
-        name: `Greeting Function`,
-        source: ` 
+  {
+    name: `Greeting Function`,
+    source: ` 
             void printHello(string name, string message) {
                 print ("Greetings\n" + name + " said " + message);
             }
@@ -21,7 +21,7 @@ const fixtures = [
             test = "actually nvm";
             printHello("John", test);
         `,
-        expected: dedent`
+    expected: dedent`
             function printHello(name, message) {
                 console.log("Greetings\n" + name + " said " + message)
             }
@@ -29,11 +29,11 @@ const fixtures = [
             let test = "ni bu hao"
             test = "actually nvm"
             printHello("John", test)
-        `
-    },
-    {
-        name: `Idk whats this supposed to do`,
-        source: ` 
+        `,
+  },
+  {
+    name: `Idk whats this supposed to do`,
+    source: ` 
             int test(int x, int z, int y) {
                 if (x == z) { 
                     while (z == y && true) {
@@ -71,7 +71,7 @@ const fixtures = [
             string c := (string) x;
             bool d := (bool) x == x;
         `,
-        expected: dedent`
+    expected: dedent`
             function test(x, z, y) {
                 if (x === z) {
                     while (z === y && true) {
@@ -108,11 +108,11 @@ const fixtures = [
             let b = Number(x)
             let c = String(x)
             let d = Boolean(x === x)
-        `
-    },
-    {
-        name: `forloops and forEach`,
-        source: ` 
+        `,
+  },
+  {
+    name: `forloops and forEach`,
+    source: ` 
             int[] array := int[5]();
             array[0] = 0;
             array[1] = 1;
@@ -130,7 +130,7 @@ const fixtures = [
                 print((string) array[item]);
             }
         `,
-        expected: dedent`
+    expected: dedent`
             let array = new Array(5)
             array[0] = 0
             array[1] = 1
@@ -147,33 +147,32 @@ const fixtures = [
             array.forEach(function(item) {
                 console.log(String(array[item]))
             })
-        `
-    },
-    {
-        name: `other`,
-        source: 
-        `
+        `,
+  },
+  {
+    name: `other`,
+    source: `
             int[] x := int[5]() + int[5]();
             void hi() {
                 return;
             }
             hi();
         `,
-        expected: dedent`
+    expected: dedent`
             let x = new Array(5) + new Array(5)
             function hi() {
                 return
             }
             hi()
-        `
-    }
-] 
+        `,
+  },
+];
 
 describe("The code generator", () => {
-    for (const fixture of fixtures) {
-      it(`produces expected js output for the ${fixture.name} program`, () => {
-        const actual = generate(analyze(parse(fixture.source)))
-        assert.deepEqual(actual, fixture.expected)
-      })
-    }
-  })
+  for (const fixture of fixtures) {
+    it(`produces expected js output for the ${fixture.name} program`, () => {
+      const actual = generate(analyze(parse(fixture.source)));
+      assert.deepEqual(actual, fixture.expected);
+    });
+  }
+});

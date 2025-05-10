@@ -1,12 +1,12 @@
-import { describe, it } from "node:test"
-import assert from "node:assert/strict"
-import parse from "../src/parser.js"
-import analyze from "../src/analyzer.js"
-import optimize from "../src/optimizer.js"
-import generate from "../src/generator.js"
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import parse from "../src/parser.js";
+import analyze from "../src/analyzer.js";
+import optimize from "../src/optimizer.js";
+import generate from "../src/generator.js";
 
 function dedent(s) {
-  return `${s}`.replace(/(?<=\n)\s+/g, "").trim()
+  return `${s}`.replace(/(?<=\n)\s+/g, "").trim();
 }
 
 const fixtures = [
@@ -18,7 +18,7 @@ const fixtures = [
     `,
     expected: dedent`
       let x = 4
-    `
+    `,
   },
   {
     name: `Constant folding`,
@@ -33,50 +33,120 @@ const fixtures = [
       console.log("hi world")
       console.log(String(true))
       console.log(String(false))
-    `
-  }
-]
+    `,
+  },
+];
 
 const errorTests = [
-  ["variable declarations", 'int x := 1; float f := 10.0f; string var := "test";'],
-  ["variable assignment", 'int x := 1; x = 2;'],
-  ["typecast print", 'int x := 1; float y := (float) x; print((string) y);'],
-  ["whileLoop", 'int x := 1; int y := 2; bool z := true; while (x < 2 && z) {x++;}'],
-  ["ifBlock", `double x := 1.0; double y := 2.0; if (x < y) {print("x is smaller than y");}`],
-  ["else ifBlock", `double x := 3.0; int y := 2; if (x < ((double) y)) {print("x is smaller than y");} else if (x > ((double) y)) {print("x is greater than y");}`],
-  ["else ifBlock2", `double x := 3.0; int y := 2; if (x < ((double) y)) {print("x is smaller than y");} else if (x > ((double) y)) {print("x is greater than y");} else if (x == ((double) y)) {print("x is equal to y");}`],
-  ["full ifBlock", `float x := 3.0f; int y := 3; if (((int) x) < y) {print("x is smaller than y");} else if (((int) x) > y) {print("x is greater than y");} else {print("x and y are equal");}`],
+  [
+    "variable declarations",
+    'int x := 1; float f := 10.0f; string var := "test";',
+  ],
+  ["variable assignment", "int x := 1; x = 2;"],
+  ["typecast print", "int x := 1; float y := (float) x; print((string) y);"],
+  [
+    "whileLoop",
+    "int x := 1; int y := 2; bool z := true; while (x < 2 && z) {x++;}",
+  ],
+  [
+    "ifBlock",
+    `double x := 1.0; double y := 2.0; if (x < y) {print("x is smaller than y");}`,
+  ],
+  [
+    "else ifBlock",
+    `double x := 3.0; int y := 2; if (x < ((double) y)) {print("x is smaller than y");} else if (x > ((double) y)) {print("x is greater than y");}`,
+  ],
+  [
+    "else ifBlock2",
+    `double x := 3.0; int y := 2; if (x < ((double) y)) {print("x is smaller than y");} else if (x > ((double) y)) {print("x is greater than y");} else if (x == ((double) y)) {print("x is equal to y");}`,
+  ],
+  [
+    "full ifBlock",
+    `float x := 3.0f; int y := 3; if (((int) x) < y) {print("x is smaller than y");} else if (((int) x) > y) {print("x is greater than y");} else {print("x and y are equal");}`,
+  ],
   ["forLoop", `for (int i := 0; i < 10; i++;) {print((string) i);}`],
-  ["properBreak", `for (int i := 0; i < 10; i++;) {print((string) i); if (i == 5) {break;}}`],
-  ["forEach", `int[] testArray := int[5](); for(int i in testArray) {print((string) i);}`],
+  [
+    "properBreak",
+    `for (int i := 0; i < 10; i++;) {print((string) i); if (i == 5) {break;}}`,
+  ],
+  [
+    "forEach",
+    `int[] testArray := int[5](); for(int i in testArray) {print((string) i);}`,
+  ],
   ["IterationPre", `int x := 1; for (int i := 0; i < 10; i++;) {++x;}`],
   ["IterationPost", `int x := 1; for (int i := 0; i < 10; i++;) {x++;}`],
   ["Args Function", `int f(int x, int y) {return x + 1;} f(1, 2);`],
   ["No Args Function", `void f() {print("Hello World");} f();`],
   ["Array", `int[] testArray := (int[5]()); int x := testArray[0];`],
-  ["Array return", `int[] testArrayGiver() { return int[5](); } int[] testArray := testArrayGiver();`],
-  ["Array Assignment", `int[] testArrayGiver() { int[] x := int[5](); x[0] = 1; x[1] = 2; return x; } int[] testArray := testArrayGiver() + testArrayGiver();`],
+  [
+    "Array return",
+    `int[] testArrayGiver() { return int[5](); } int[] testArray := testArrayGiver();`,
+  ],
+  [
+    "Array Assignment",
+    `int[] testArrayGiver() { int[] x := int[5](); x[0] = 1; x[1] = 2; return x; } int[] testArray := testArrayGiver() + testArrayGiver();`,
+  ],
   ["Array Ops", `int[] x := int[5]() + int[5]();`],
-  ["Numeral Ops", `int x := 1 + 1; x = 1 - 1; x = 1 * 1; x = 1 / 1; x = 1 % 1; x = 1 ** 1; x = -x; x = (x); int getX() {return 1;} x = getX();`],
-  ["String Ops", `string x := "s" + "s"; string getX() {return "1";} x = getX(); x = ("x");`],
-  ["Boolean Comparisons1", 'float x := 1.0f; float y := 2.0f; bool z := x < y;'],
-  ["Boolean Comparisons2", 'float x := 1.0f; float y := 2.0f; bool z := x > y;'],
-  ["Boolean Comparisons3", 'float x := 1.0f; float y := 2.0f; bool z := x <= y;'],
-  ["Boolean Comparisons4", 'float x := 1.0f; float y := 2.0f; bool z := x >= y;'],
-  ["Boolean Comparisons5", 'float x := 1.0f; float y := 2.0f; bool z := x == y;'],
-  ["Boolean Comparisons6", 'float x := 1.0f; float y := 2.0f; bool z := x != y;'],
-  ["Boolean Expressions", 'float x := 1.0f; float y := 2.0f; bool z := x != y && x == y;'],
+  [
+    "Numeral Ops",
+    `int x := 1 + 1; x = 1 - 1; x = 1 * 1; x = 1 / 1; x = 1 % 1; x = 1 ** 1; x = -x; x = (x); int getX() {return 1;} x = getX();`,
+  ],
+  [
+    "String Ops",
+    `string x := "s" + "s"; string getX() {return "1";} x = getX(); x = ("x");`,
+  ],
+  [
+    "Boolean Comparisons1",
+    "float x := 1.0f; float y := 2.0f; bool z := x < y;",
+  ],
+  [
+    "Boolean Comparisons2",
+    "float x := 1.0f; float y := 2.0f; bool z := x > y;",
+  ],
+  [
+    "Boolean Comparisons3",
+    "float x := 1.0f; float y := 2.0f; bool z := x <= y;",
+  ],
+  [
+    "Boolean Comparisons4",
+    "float x := 1.0f; float y := 2.0f; bool z := x >= y;",
+  ],
+  [
+    "Boolean Comparisons5",
+    "float x := 1.0f; float y := 2.0f; bool z := x == y;",
+  ],
+  [
+    "Boolean Comparisons6",
+    "float x := 1.0f; float y := 2.0f; bool z := x != y;",
+  ],
+  [
+    "Boolean Expressions",
+    "float x := 1.0f; float y := 2.0f; bool z := x != y && x == y;",
+  ],
   ["Boolean Expressions1", `bool z := (1 != 1);`],
-  ["Boolean Expressions2", `bool z := (1 < 2) || (1 != 1 && 1 == 1) || (1 < 2);`],
-  ["Boolean Expressions3", `bool z := (1 < 2) || (1 != 1 && 1 == 1) || (1 < 2) || true || 1 == 1;`],
-  ["Bool Comp 2", `bool z:= (bool) (true); z = false; bool getX() {return true;} z = (getX());`],
-  ["Void Function", `void doNothing(int a, string b) {return;} int main() { print ((string) doNothing(5, "Hello")); return 0;}`],
+  [
+    "Boolean Expressions2",
+    `bool z := (1 < 2) || (1 != 1 && 1 == 1) || (1 < 2);`,
+  ],
+  [
+    "Boolean Expressions3",
+    `bool z := (1 < 2) || (1 != 1 && 1 == 1) || (1 < 2) || true || 1 == 1;`,
+  ],
+  [
+    "Bool Comp 2",
+    `bool z:= (bool) (true); z = false; bool getX() {return true;} z = (getX());`,
+  ],
+  [
+    "Void Function",
+    `void doNothing(int a, string b) {return;} int main() { print ((string) doNothing(5, "Hello")); return 0;}`,
+  ],
   ["Void NoArgs", `void x() {return;} int main() { x(); return 0; }`],
   ["Operators", `int x := 1; x += 1; x -= 1; x *= 1; x /= 1;`],
   ["Operators More", `int x := 1; int y := x++; y = ++x;`],
   ["String Add", `void add(string x) {print("hello " + x);}`],
   ["Other", `bool x := true`],
-  ["Hello World",
+  [
+    "Hello World",
     `
     void printHello(string name) {
       print ("Hello World!" + name);
@@ -84,9 +154,10 @@ const errorTests = [
     printHello("ni hao");
     string test := "ni bu hao";
     printHello(test);
-    `
+    `,
   ],
-  ["Recursive Test",
+  [
+    "Recursive Test",
     `
     int factorial(int n) {
       if (n == 0) { return 1; }
@@ -97,9 +168,10 @@ const errorTests = [
       print ((string) factorial(5));
       return 0;
     }
-    `
+    `,
   ],
-  ["Nothing Test", 
+  [
+    "Nothing Test",
     `
     void doNothing(int a, string b) {return;}
 
@@ -107,38 +179,40 @@ const errorTests = [
         print ((string) doNothing(5, "Hello"));
       return 0;
     }
-    `
+    `,
   ],
-  ["Calling global variable",
+  [
+    "Calling global variable",
     `
     int x := 1;
     int func() {
       return x;
     }
     print((string) func());
-    `
+    `,
   ],
-  ["Assigning global variable when local var with same name exists",
+  [
+    "Assigning global variable when local var with same name exists",
     `
     int func() {
       int x := 1;
       return x;
     }
     int x := func();
-    `
+    `,
   ],
-]
+];
 
 describe("The code optimizer", () => {
   for (const fixture of fixtures) {
     it(`produces expected js output for the ${fixture.name} program`, () => {
-      const actual = generate(optimize(analyze(parse(fixture.source))))
-      assert.deepEqual(actual, fixture.expected)
-    })
+      const actual = generate(optimize(analyze(parse(fixture.source))));
+      assert.deepEqual(actual, fixture.expected);
+    });
   }
   // for (const [scenario, source] of errorTests) {
   //   it(`no error on ${scenario}`, () => {
   //     assert.ok(generate(optimize(analyze(parse(source)))))
   //   })
   // }
-})
+});

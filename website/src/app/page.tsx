@@ -1,26 +1,26 @@
-'use client';
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+"use client";
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const teamMembers = [
-    { 
-      name: 'Leo Dai', 
-      role: 'Developer',
-      image: '/images/team/LeoDai.jpg'
+    {
+      name: "Leo Dai",
+      role: "Developer",
+      image: "/images/team/LeoDai.jpg",
     },
-    { 
-      name: 'Conner Ryan Peterson', 
-      role: 'Developer',
-      image: '/images/team/connerpeterson.jpg'
+    {
+      name: "Conner Ryan Peterson",
+      role: "Developer",
+      image: "/images/team/connerpeterson.jpg",
     },
-    { 
-      name: 'Evan Steinhoff', 
-      role: 'Developer',
-      image: '/images/team/evansteinhoff.jpg'
-    }
+    {
+      name: "Evan Steinhoff",
+      role: "Developer",
+      image: "/images/team/evansteinhoff.jpg",
+    },
   ];
 
   return (
@@ -28,13 +28,13 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center">
         <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-30" />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="relative text-center px-4 z-10"
         >
-          <motion.h1 
+          <motion.h1
             className="text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600"
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
@@ -42,37 +42,52 @@ export default function Home() {
           >
             Convaneo
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-2xl text-gray-300 mb-8 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            A statically typed programming language focused on simplicity and clarity
+            A statically typed programming language focused on simplicity and
+            clarity
           </motion.p>
-          <motion.div 
+          <motion.div
             className="flex justify-center gap-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <Link href="https://github.com/evansteinho/Convaneo" 
-                  className="px-8 py-4 rounded-lg transition-all hover:scale-105 bg-gradient-to-r from-blue-500 to-purple-700 hover:from-blue-600 hover:to-purple-800">
+            <Link
+              href="https://github.com/evansteinho/Convaneo"
+              className="px-8 py-4 rounded-lg transition-all hover:scale-105 bg-gradient-to-r from-blue-500 to-purple-700 hover:from-blue-600 hover:to-purple-800"
+            >
               GitHub Repository
             </Link>
-            <Link href="#examples" 
-                  className="px-8 py-4 rounded-lg transition-all hover:scale-105 bg-gradient-to-r from-purple-700 to-blue-500 hover:from-purple-800 hover:to-blue-600">
+            <Link
+              href="#examples"
+              className="px-8 py-4 rounded-lg transition-all hover:scale-105 bg-gradient-to-r from-purple-700 to-blue-500 hover:from-purple-800 hover:to-blue-600"
+            >
               View Examples
             </Link>
           </motion.div>
         </motion.div>
-        <motion.div 
+        <motion.div
           className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          <svg
+            className="w-6 h-6 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
           </svg>
         </motion.div>
       </section>
@@ -81,7 +96,7 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center py-20">
         <div className="absolute inset-0 bg-[url('/images/story-bg.jpg')] bg-cover bg-fixed bg-center opacity-20" />
         <div className="container mx-auto px-4 z-10">
-          <motion.div 
+          <motion.div
             className="max-w-3xl mx-auto"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -96,7 +111,11 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                Convaneo was born from a vision of creating a programming language that combines the power of modern features with the elegance of simplicity. Inspired by the historical roots of programming languages, we set out to create a language that would be both powerful and accessible.
+                Convaneo was born from a vision of creating a programming
+                language that combines the power of modern features with the
+                elegance of simplicity. Inspired by the historical roots of
+                programming languages, we set out to create a language that
+                would be both powerful and accessible.
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, x: 50 }}
@@ -104,7 +123,11 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                Our language features a comprehensive set of modern programming tools, including static typing, built-in data structures, and powerful iteration methods. We&apos;ve carefully designed the syntax to be intuitive while maintaining the flexibility needed for complex programming tasks.
+                Our language features a comprehensive set of modern programming
+                tools, including static typing, built-in data structures, and
+                powerful iteration methods. We&apos;ve carefully designed the
+                syntax to be intuitive while maintaining the flexibility needed
+                for complex programming tasks.
               </motion.p>
               <motion.p
                 initial={{ opacity: 0, x: -50 }}
@@ -112,7 +135,11 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 viewport={{ once: true }}
               >
-                The development of Convaneo has been driven by a commitment to creating a language that prioritizes developer experience and code clarity. We believe that programming should be both powerful and enjoyable, and Convaneo embodies this philosophy in every aspect of its design.
+                The development of Convaneo has been driven by a commitment to
+                creating a language that prioritizes developer experience and
+                code clarity. We believe that programming should be both
+                powerful and enjoyable, and Convaneo embodies this philosophy in
+                every aspect of its design.
               </motion.p>
             </div>
           </motion.div>
@@ -123,7 +150,7 @@ export default function Home() {
       <section id="examples" className="relative min-h-screen py-20">
         <div className="absolute inset-0 bg-[url('/images/code-bg.jpg')] bg-cover bg-fixed bg-center opacity-10" />
         <div className="container mx-auto px-4 z-10 relative">
-          <motion.h2 
+          <motion.h2
             className="text-4xl font-bold mb-16 text-center"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -134,7 +161,7 @@ export default function Home() {
           </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Test Function Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -142,7 +169,9 @@ export default function Home() {
               viewport={{ once: true }}
               whileHover={{ scale: 1.02 }}
             >
-              <h3 className="text-xl font-semibold mb-4">Nested Control Flow</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                Nested Control Flow
+              </h3>
               <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
                 <code>{`int test(int x, int z, int y) {
     if (x == z) { 
@@ -160,7 +189,7 @@ export default function Home() {
             </motion.div>
 
             {/* String Conversion Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -182,7 +211,7 @@ int main() {
             </motion.div>
 
             {/* Function Operations Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -190,7 +219,9 @@ int main() {
               viewport={{ once: true }}
               whileHover={{ scale: 1.02 }}
             >
-              <h3 className="text-xl font-semibold mb-4">Function Operations</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                Function Operations
+              </h3>
               <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
                 <code>{`int increment(int x) {x++;}
 int decrement(int x) {x--;}
@@ -203,7 +234,7 @@ int randomFunc(int x, int y) {
             </motion.div>
 
             {/* Void Function Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -225,7 +256,7 @@ int main() {
             </motion.div>
 
             {/* Recursive Function Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -233,7 +264,9 @@ int main() {
               viewport={{ once: true }}
               whileHover={{ scale: 1.02 }}
             >
-              <h3 className="text-xl font-semibold mb-4">Recursive Functions</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                Recursive Functions
+              </h3>
               <pre className="bg-gray-900/90 p-4 rounded-lg overflow-x-auto">
                 <code>{`int factorial(int n) {
     if (n == 0) { return 1; }
@@ -248,7 +281,7 @@ int main() {
             </motion.div>
 
             {/* Control Flow Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -271,7 +304,7 @@ else {return w;}`}</code>
             </motion.div>
 
             {/* Loop Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -288,7 +321,7 @@ else {return w;}`}</code>
             </motion.div>
 
             {/* Array Operations Example */}
-            <motion.div 
+            <motion.div
               className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg shadow-xl"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -325,7 +358,7 @@ else {return w;}`}</code>
       <section className="relative min-h-screen flex items-center py-20">
         <div className="absolute inset-0 bg-[url('/images/team-bg.jpg')] bg-cover bg-fixed bg-center opacity-20" />
         <div className="container mx-auto px-4 z-10">
-          <motion.h2 
+          <motion.h2
             className="text-4xl font-bold mb-16 text-center"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -336,7 +369,7 @@ else {return w;}`}</code>
           </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {teamMembers.map((member, index) => (
-              <motion.div 
+              <motion.div
                 key={member.name}
                 className="bg-gray-800/80 backdrop-blur-sm p-6 rounded-lg text-center shadow-xl"
                 initial={{ opacity: 0, y: 50 }}
@@ -354,11 +387,14 @@ else {return w;}`}</code>
                         width={128}
                         height={128}
                         className="w-full h-full object-cover"
-                        style={{ objectPosition: member.name === 'Leo Dai' ? '90% 90%' : 'center' }}
+                        style={{
+                          objectPosition:
+                            member.name === "Leo Dai" ? "90% 90%" : "center",
+                        }}
                         priority={true}
                         onError={(e) => {
-                          console.error('Error loading image:', e);
-                          e.currentTarget.src = '/images/placeholder.jpg';
+                          console.error("Error loading image:", e);
+                          e.currentTarget.src = "/images/placeholder.jpg";
                         }}
                       />
                     ) : (
@@ -382,4 +418,4 @@ else {return w;}`}</code>
       </footer>
     </main>
   );
-} 
+}

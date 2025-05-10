@@ -12,8 +12,8 @@ if (process.argv.length !== 3) {
 const sourceCode = fs.readFileSync(process.argv[2], "utf8");
 const match = parse(sourceCode);
 const program = analyze(match);
-const optimziedProgram = optimize(program)
-const programString = generate(optimziedProgram)
+const optimziedProgram = optimize(program);
+const programString = generate(optimziedProgram);
 fs.writeFile(`${process.argv[2]}.js`, programString, (err) => {
   if (err) throw err;
-})
+});
