@@ -1,0 +1,19 @@
+int gcd(int x, int y) {
+    int result := x;
+    if (y < x) {
+        result = y;
+    }
+
+    while (result > 0) {
+        if (x % result == 0 && y % result == 0) {
+            break;
+        }
+        result --;
+    }
+
+    return result;
+}
+
+int a := 4;
+int b := 6;
+print((string) gcd(a, b));

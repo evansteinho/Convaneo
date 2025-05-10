@@ -1,0 +1,61 @@
+int[] heapify(int[] arr, int n, int i) {
+    int largest := i;
+
+    int left := 2 * i + 1;
+
+    int right := 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest]) {
+        largest = left;
+    }
+
+    if (right < n && arr[right] > arr[largest]) {
+        largest = right;
+    }
+
+    if (largest != i) {
+        int temp := arr[i];
+        arr[i] = arr[largest];
+        arr[largest] = temp;
+
+        arr = heapify(arr, n, largest);
+    }
+    return arr;
+}
+
+int[] heapSort(int[] arr) {
+    int arrLength := 0;
+    for (int x in arr) {
+        arrLength++;
+    }
+
+    for (int i := arrLength / 2 - 1; i >= 0; i--;) {
+        arr = heapify(arr, arrLength, i);
+    }
+
+    for (int j := arrLength - 1; j > 0; j--;) {
+        int temp := arr[0];
+        arr[0] = arr[j];
+        arr[j] = temp;
+
+        arr = heapify(arr, j, 0)
+    } 
+
+    return arr;
+}
+
+//Create and heapsort a
+
+int[] a := int[5]();
+a[0] = 10;
+a[1] = 30;
+a[2] = 239;
+a[3] = 1;
+a[4] = 4;
+a = heapSort(a);
+
+// Print out values of a
+
+for (int x in a) {
+    print((string) x);
+}

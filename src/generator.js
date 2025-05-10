@@ -30,6 +30,9 @@ export default function generate(program) {
     VariableEntity(node){
       return `${node.name}`
     },
+    ArrayEntity(node) {
+      return `${node.name}` 
+    },
 
     //Expressions
     NumericExpression(node) {
@@ -69,6 +72,9 @@ export default function generate(program) {
     },
     ArrayValue(node) {
       return `new Array(${gen(node.size)})`
+    },
+    ArrayItem(node) {
+      return `${node.name}[${node.index}]`
     },
     IDValue(node) {
       let negative = ""

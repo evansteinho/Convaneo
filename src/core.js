@@ -29,6 +29,9 @@ export function variableEntity(name, type) {
 export function arrayEntity(name, type, size) {
     return { kind: "ArrayEntity", name, type, size }
 }
+export function arrayItem(name, type, index) {
+    return { kind: "ArrayItem", name, type, index }
+}
 
 // Expressions
 export function parameters(parameters) {

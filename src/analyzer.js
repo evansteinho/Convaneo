@@ -115,7 +115,7 @@ export default function analyze(match) {
     }
     let sameTypes = true;
     for (let i = 0; i < args1.length; i++) {
-      sameTypes = sameTypes && args1[i] === args2[i]
+      sameTypes = sameTypes && args1[i].elementType === args2[i].elementType
     }
     checkCondition(sameTypes, `Mismatched function arguments`, location)
   }
@@ -334,6 +334,13 @@ export default function analyze(match) {
       const array = context.search(id.sourceString)
       existsCondition(array, id.sourceString, id)
       return core.arrayIndexValue(array.type.elementType, array, exp)
+    },
+    ArrayItem(id, _open, expression, _close) {
+      const exp = expression.rep()
+      numericTypeCondition(exp, id)
+      const array = context.search(id.sourceString)
+      existsCondition(array, id.sourceString, id)
+      return core.arrayItem(id.sourceString, array.type, exp)
     },
     NumericExpression_add(numericExpression, _plus, numericTerm) {
       const numExpression = numericExpression.rep()

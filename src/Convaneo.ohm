@@ -52,6 +52,7 @@ Convaneo {
                                 | NumericPrimary
     NumericPrimary              = numericValue
     							| Typecast		--typecast
+                                | ArrayItem
                                 | id iterationOperator       --iterPost
                                 | iterationOperator id       --iterPre
                                 | "(" NumericExpression ")"    --parens
@@ -85,6 +86,7 @@ Convaneo {
                                 | "(" ArrayExpression ")"      --parens
 								| FunctionCallExpression		--funcs
                                 | id		--id
+	ArrayItem			= id "[" NumericExpression "]"
     Block						= "{" Statement* "}"
     Type                        = ArrayType
                                 | numericType

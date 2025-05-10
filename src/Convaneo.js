@@ -14,4 +14,6 @@ const match = parse(sourceCode);
 const program = analyze(match);
 const optimziedProgram = optimize(program)
 const programString = generate(optimziedProgram)
-console.log(programString)
+fs.writeFile(`${process.argv[2]}.js`, programString, (err) => {
+  if (err) throw err;
+})
