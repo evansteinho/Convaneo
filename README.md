@@ -14,7 +14,7 @@ Features
 - Our language will feature most of the tools that modern programming languages enjoy including but not limited to:
 - If/If Else/Else Statements
 - Standard Primitive Types (bools, ints, floats, strings, etc)
-- Built in Iteration Methods (foreach loops, max, min, etc)
+- Built in Iteration Method (foreach loops)
 - Boolean Logic
 - Arithmatic Operators with Ints and Floats (\*, +, -, /, \*\*, //, ++, --)
 - String Methods (slicing, formatting, appending, etc)
